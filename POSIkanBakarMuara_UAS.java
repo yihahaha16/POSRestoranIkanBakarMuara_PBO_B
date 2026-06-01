@@ -32,6 +32,9 @@ class MenuHarga extends Menu {//inheritance karena ada dua jenis menu, satu paka
     public int getHargaMenuHarga(){ return hargaMenuHarga; }//getter untuk mengambil atribut yang private
     @Override
     public void tampilMenu(){
+        // if(menuStatus == Status.Habis){
+        //     return;
+        // }
            System.out.println(menuNama+" Rp "+getHargaMenuHarga());
     }
 }
@@ -45,6 +48,9 @@ class MenuPoin extends Menu {//inheritance
     public int getHargaMenuPoin(){ return hargaMenuPoin; }//getter
         @Override
     public void tampilMenu(){
+        // if(menuStatus == Status.Habis){
+        //     return;
+        // }
         System.out.println(menuNama+" "+getHargaMenuPoin()+" poin");
     }
 }
@@ -356,7 +362,7 @@ System.out.println("15. Pesan\n0. Kembali");
         int count=1;
         System.out.println("=== Makanan ===");
         for(MenuHarga menu: menuHarga){
-            if(menu.menuKategori.equals(Menu.Kategori.Makanan)){
+            if((menu.menuKategori.equals(Menu.Kategori.Makanan)) && (menu.menuStatus == Menu.Status.Tersedia)){
                 System.out.print(count+". ");
                 menu.tampilMenu();
                 count++;
@@ -364,7 +370,7 @@ System.out.println("15. Pesan\n0. Kembali");
         }
         System.out.println("=== Minuman ===");
         for(MenuHarga menu: menuHarga){
-            if(menu.menuKategori.equals(Menu.Kategori.Minuman)){
+            if((menu.menuKategori.equals(Menu.Kategori.Minuman)) && (menu.menuStatus == Menu.Status.Tersedia)){
                 System.out.print(count+". ");
                 count++;
                 menu.tampilMenu();
@@ -373,6 +379,7 @@ System.out.println("15. Pesan\n0. Kembali");
         if(isMember){
         System.out.println("=== Poin ===");
         for(MenuPoin menu: menuPoin){
+            if(menu.menuStatus == Menu.Status.Tersedia)
             System.out.print(count+". ");
             count++;    
             menu.tampilMenu();
