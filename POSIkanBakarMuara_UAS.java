@@ -9,13 +9,13 @@ class Menu {//superclass
     enum Status {Tersedia, Habis}
     enum Kategori {Makanan, Minuman}
     static int counter = 1;
-    String menuId;
+    String menuID;
     String menuNama;
     Status menuStatus;  
     Kategori menuKategori;        
     
     public Menu( String menuNama, Status menuStatus, Kategori menuKategori){//constructor
-        this.menuId = "M"+ counter++;
+        this.menuID = "M"+ counter++;
         this.menuNama = menuNama;
         this.menuStatus = menuStatus;
         this.menuKategori = menuKategori;
@@ -206,8 +206,10 @@ public class POSIkanBakarMuara_UAS {
     static ArrayList<Keranjang> keranjangPelanggan = new ArrayList<>(); //keranjang untuk menu harga
     static ArrayList<Keranjang> keranjangPoin= new ArrayList<>(); //keranjang untuk menu poin
     static Guest guestSekarang; //terisi kalau login sbg guest
-    static int usedMember; //terisi kalau login sbg member, simpan indeksnya array list members 
+    static int usedMember=0; //terisi kalau login sbg member, simpan indeksnya array list members 
     static boolean dariKeranjang=false; //penanda untuk kembali ke halaman keranjang
+    static Pesanan pesanan;
+    static int subtotal=0, pajak=0, totalAkhir=0, poin=0;
     static int jumlahMenu(){ //hitung menu otomatis untuk opsi bayar, lihat keranjang dll akan menyesuaikan total menu yang ada
     int total = menuHarga.length;
     if(isMember){
@@ -359,13 +361,13 @@ public class POSIkanBakarMuara_UAS {
         int count=1;
         System.out.println("=== Makanan ===");
         for(MenuHarga menu: menuHarga){
-            if((menu.menuKategori.equals(Menu.Kategori.Makanan))){
+            if(menu != null &&(menu.menuKategori.equals(Menu.Kategori.Makanan))){
                 System.out.print(count+". ");
                 menu.tampilMenu();
                 count++;}}
         System.out.println("=== Minuman ===");
         for(MenuHarga menu: menuHarga){
-            if((menu.menuKategori.equals(Menu.Kategori.Minuman))){
+            if(menu != null &&(menu.menuKategori.equals(Menu.Kategori.Minuman))){
                 System.out.print(count+". ");
                 count++;
                 menu.tampilMenu();}}
@@ -410,21 +412,39 @@ public class POSIkanBakarMuara_UAS {
                 pesan();}
             else{
                 System.out.print("Kuantitas: "); int kuantitas = input.nextInt();input.nextLine();
-                keranjangPelanggan.add(new Keranjang(menuHarga[pilih-1], kuantitas));
+                Menu menuHargaDipilih = menuHarga[pilih - 1];
+                boolean ditemukan = false;
+                for (Keranjang k : keranjangPelanggan) {
+                    if (k.menu == menuHargaDipilih) {
+                        k.kuantitas += kuantitas;
+                        ditemukan = true;
+                        break;}}
+                if (!ditemukan) {
+                    keranjangPelanggan.add(new Keranjang(menuHargaDipilih, kuantitas));}
                 System.out.println("Menu "+menuHarga[pilih-1].menuNama+" ("+kuantitas+") berhasil ditambahkan ke keranjang");
                 pesan();}}
         else{
             if(isMember&&pilih>=11&&pilih<=14){
-                if(menuPoin[pilih-menuHarga.length-1].menuStatus.equals(Menu.Status.Habis)){
+                if(menuPoin[pilih-menuPoin.length-1].menuStatus.equals(Menu.Status.Habis)){
                     System.out.println("Maaf menu habis");}
-                else if(members.get(usedMember).getPoin()<menuPoin[pilih-menuHarga.length-1].getHargaMenuPoin()){
+                else if(members.get(usedMember).getPoin()<menuPoin[pilih-menuPoin.length-1].getHargaMenuPoin()){
                     System.out.println("Maaf poin anda tidak mencukupi");}
                 else{
                     System.out.print("Kuantitas: "); int kuantitas = input.nextInt();input.nextLine();
-                    if(menuPoin[pilih-menuPoin.length-1].getHargaMenuPoin()*kuantitas>=members.get(usedMember).getPoin())
-                    keranjangPoin.add(new Keranjang(menuPoin[pilih-menuPoin.length-1], kuantitas));
-                    System.out.println("Menu "+menuPoin[pilih-menuPoin.length-1].menuNama+" ("+kuantitas+") berhasil ditambahkan ke keranjang");}    pesan();
-            }
+                    if(members.get(usedMember).getPoin()>=menuPoin[pilih-menuPoin.length-1].getHargaMenuPoin()*kuantitas){
+                    Menu menuPoinDipilih = menuPoin[pilih - menuPoin.length - 1];
+                    boolean ditemukan = false;
+                    for (Keranjang k : keranjangPoin) {
+                        if (k.menu == menuPoinDipilih) {
+                            k.kuantitas += kuantitas;
+                            ditemukan = true;
+                            break;}}
+                    if (!ditemukan) {
+                        keranjangPoin.add(new Keranjang(menuPoinDipilih, kuantitas));}
+                    System.out.println("Menu "+menuPoin[pilih-menuPoin.length-1].menuNama+" ("+kuantitas+") berhasil ditambahkan ke keranjang");}   
+                    else{
+                        System.out.println("Maaf poin anda tidak mencukupi");}
+                    pesan();}}
             else if(pilih==jumlahMenu()+1){
                 lihatKeranjang();}
             else if(pilih==jumlahMenu()+2){
@@ -436,6 +456,8 @@ public class POSIkanBakarMuara_UAS {
     //lihat isi keranjang/pesanan yang udah dipesan
     static void lihatKeranjang(){
         System.out.println("\n=== Keranjang ===");
+        if (keranjangPelanggan.isEmpty()) {
+            System.out.println("Keranjang kosong");}
         for(int i=0;i<keranjangPelanggan.size();i++){
             System.out.println(keranjangPelanggan.get(i).menu.menuNama+" ("+keranjangPelanggan.get(i).kuantitas+")");} //arraylist memang pakai get(i) gabisa [i]
         for(int j=0;j<keranjangPoin.size();j++){
@@ -450,6 +472,9 @@ public class POSIkanBakarMuara_UAS {
                 dariKeranjang = true;
                 pesan();break;
             case 2:
+                if (keranjangPelanggan.isEmpty() && keranjangPoin.isEmpty()) {
+                    System.out.println("Keranjang kosong!");
+                    lihatKeranjang();}
                 bayar();break;
             case 3:
                 hapus(); break;
@@ -472,11 +497,11 @@ public class POSIkanBakarMuara_UAS {
 
     //menangani pembayaran
     static void bayar(){
-        int subtotal = 0; int poin=0;
+        subtotal = 0; poin=0;
         System.out.println("\n=== Pesanan ===");
         for(int i=0;i<keranjangPelanggan.size();i++){
             MenuHarga mh = (MenuHarga) keranjangPelanggan.get(i).menu;//casting dari tipe keranjang ke tipe menu harga biar bisa pakai getnya
-            System.out.println((i+1)+". "+ keranjangPelanggan.get(i).menu.menuNama+" ("+keranjangPelanggan.get(i).kuantitas+") = Rp"+(mh.getHargaMenuHarga()*keranjangPelanggan.get(i).kuantitas));
+            System.out.println(keranjangPelanggan.get(i).menu.menuNama+" ("+keranjangPelanggan.get(i).kuantitas+") = Rp"+(mh.getHargaMenuHarga()*keranjangPelanggan.get(i).kuantitas));
             subtotal+=mh.getHargaMenuHarga()*keranjangPelanggan.get(i).kuantitas;}
         if(isMember){
             if(keranjangPoin.size()>0){
@@ -485,14 +510,14 @@ public class POSIkanBakarMuara_UAS {
                     MenuPoin mp = (MenuPoin) keranjangPoin.get(j).menu;
                     System.out.println((keranjangPelanggan.size()+j+1)+". "+keranjangPoin.get(j).menu.menuNama+" ("+keranjangPoin.get(j).kuantitas+") = "+(mp.getHargaMenuPoin()*keranjangPoin.get(j).kuantitas)+" Poin");
                     poin+=mp.getHargaMenuPoin()*keranjangPoin.get(j).kuantitas;}}
-        int pajak = (int)(subtotal * Pembayaran.pajak),indeks=keranjangPelanggan.size()+keranjangPoin.size();
-        int totalAkhir = subtotal + pajak;
+        pajak = (int)(subtotal * Pembayaran.pajak);
+        totalAkhir = subtotal + pajak;
         System.out.println("\n====================");
-        System.out.println("Subtotal: Rp" + subtotal +"\nPajak (10%): Rp" + pajak+ "\nTotal Bayar: Rp" + totalAkhir+"\nPoin Terpakai: "+poin+" poin");                
+        System.out.println("Subtotal: Rp" + subtotal +"\nPajak (10%): Rp" + pajak+ "\nTotal Bayar: Rp" + totalAkhir);
+        if(isMember) System.out.println("\nPoin Terpakai: "+poin+" poin");                
         System.out.println("====================");
         System.out.println("\n=== Tipe Pesanan ===\n1. Dine In\n2. Take Away");
         System.out.print("Pilih: ");int tipe = input.nextInt();input.nextLine();
-        Pesanan pesanan;
         if(tipe == 1){
             System.out.print("Nomor Meja: ");
             String noMeja = input.nextLine();
@@ -503,42 +528,32 @@ public class POSIkanBakarMuara_UAS {
             System.out.println("Pilihan tidak valid");
             bayar();
             return;}
-        System.out.println((indeks+1)+". Bayar Cash\n"+(indeks+2)+". Bayar QRIS\n0. Kembali");
+        System.out.println((1)+". Bayar Cash\n"+(2)+". Bayar QRIS\n0. Kembali");
         System.out.print("Pilih: "); int pilih = input.nextInt(); input.nextLine();
         if(pilih==0){
             dashboardSetelahLogin();}
-        else if(pilih==indeks+1){
+        else if(pilih==1){
             PembayaranCash cash = new PembayaranCash(totalAkhir);
             System.out.println("\n=== Pembayaran Cash ===");
             System.out.println("Silahkan bayar di kasir dengan nominal Rp" + totalAkhir);
             System.out.print("Masukkan uang: ");
             int saldo = input.nextInt();input.nextLine();
+            if (saldo < 0) {
+                System.out.println("Uang tidak valid");return;}
             cash.setSaldo(saldo);
             cash.bayar();
-            System.out.println("\n======= STRUK PEMBAYARAN =======");
-            System.out.println("================================");
-            System.out.println("ID Pesanan: " + pesanan.pesananID);
-            if(pesanan instanceof DineIn){
-                System.out.println("Tipe: Dine In");
-                System.out.println("No Meja: " + ((DineIn) pesanan).noMeja);}
-            else {
-                System.out.println("Tipe: Take Away");}
+        if (cash.pembayaranBerhasil()) {
+            cetakUIStruk();
             cash.cetakStruk();
-            if(!cash.pembayaranBerhasil()){
-                bayar();
-                return;}}
-        else if(pilih==indeks+2){
+        }
+        else if(!cash.pembayaranBerhasil()){
+            bayar();
+            return;}}
+        else if(pilih==2){
             System.out.println("\n=== Pembayaran QRIS ===");
             PembayaranQRIS qris = new PembayaranQRIS(totalAkhir);
             qris.bayar();
-            System.out.println("\n======= STRUK PEMBAYARAN =======");
-            System.out.println("================================");
-            System.out.println("ID Pesanan: " + pesanan.pesananID);
-            if(pesanan instanceof DineIn){
-                System.out.println("Tipe: Dine In");
-                System.out.println("No Meja: " + ((DineIn) pesanan).noMeja);}
-            else {
-                System.out.println("Tipe: Take Away");}
+            cetakUIStruk();
             qris.cetakStruk();}
         else{
             System.out.println("Pilihan tidak valid");
@@ -558,22 +573,63 @@ public class POSIkanBakarMuara_UAS {
 
     //hapus pesanan dari keranjang
     static void hapus(){
+        int pilih;
         System.out.println("\n=== Hapus ===");
+        if (keranjangPelanggan.isEmpty()&&keranjangPoin.isEmpty()) {
+            System.out.println("Keranjang kosong");}
         for(int i=0;i<keranjangPelanggan.size();i++){
             System.out.println((i+1)+". "+ keranjangPelanggan.get(i).menu.menuNama+" ("+keranjangPelanggan.get(i).kuantitas+")");} //arraylist memang pakai get(i) gabisa [i]
-        System.out.println("0. Kembali\nPilih pesanan yang ingin dihapus: ");int pilih = input.nextInt();input.nextLine();
-        if(pilih==0){
-            dashboardSetelahLogin();}
-        else if(pilih>=1 && pilih<=keranjangPelanggan.size()){
-            System.out.println(keranjangPelanggan.get(pilih-1).menu.menuNama+" berhasil dihapus");
-            keranjangPelanggan.remove(pilih-1);}
-        else if(isMember && pilih > keranjangPelanggan.size() &&pilih <= keranjangPelanggan.size()+keranjangPoin.size()){
-            System.out.println(keranjangPoin.get(pilih - keranjangPelanggan.size() - 1).menu.menuNama+" berhasil dihapus");
-            keranjangPoin.remove(pilih - keranjangPelanggan.size() - 1);}
-        else{
-            System.out.println("Pilihan tidak valid");
-            hapus();}}
+        System.out.println("0. Kembali");
+        if (keranjangPelanggan.isEmpty()&&keranjangPoin.isEmpty()) {
+            System.out.print("Pilih: ");pilih = input.nextInt();input.nextLine();
+            if(pilih==0){dashboardSetelahLogin();}}
+        else if(!keranjangPelanggan.isEmpty()||!keranjangPoin.isEmpty()){
+            System.out.println("Pilih pesanan yang ingin dihapus: ");pilih = input.nextInt();input.nextLine();
+            if(pilih==0){dashboardSetelahLogin();}
+            else if(pilih>=1 && pilih<=keranjangPelanggan.size()){
+                System.out.println(keranjangPelanggan.get(pilih-1).menu.menuNama+" berhasil dihapus");
+                keranjangPelanggan.remove(pilih-1);}
+            else if(isMember && pilih > keranjangPelanggan.size() &&pilih <= keranjangPelanggan.size()+keranjangPoin.size()){
+                System.out.println(keranjangPoin.get(pilih - keranjangPelanggan.size() - 1).menu.menuNama+" berhasil dihapus");
+                keranjangPoin.remove(pilih - keranjangPelanggan.size() - 1);}
+            else{
+                System.out.println("Pilihan tidak valid");
+                hapus();}}
+        }
+    //untuk mencetak rincian pesanan di struk    
+    static void rincianPesanan(){
+        for(int i=0;i<keranjangPelanggan.size();i++){
+            MenuHarga mh = (MenuHarga) keranjangPelanggan.get(i).menu;//casting dari tipe keranjang ke tipe menu harga biar bisa pakai getnya
+            System.out.println(keranjangPelanggan.get(i).menu.menuNama+" ("+keranjangPelanggan.get(i).kuantitas+") = Rp"+(mh.getHargaMenuHarga()*keranjangPelanggan.get(i).kuantitas));}
+        if(isMember){
+            if(keranjangPoin.size()>0){
+                System.out.println("\n=== Pesanan dengan Poin ===");}
+                for(int j=0;j<keranjangPoin.size();j++){
+                    MenuPoin mp = (MenuPoin) keranjangPoin.get(j).menu;
+                    System.out.println((keranjangPelanggan.size()+j+1)+". "+keranjangPoin.get(j).menu.menuNama+" ("+keranjangPoin.get(j).kuantitas+") = "+(mp.getHargaMenuPoin()*keranjangPoin.get(j).kuantitas)+" Poin");}}
+                System.out.println("\n===============");
+                System.out.println("Subtotal: Rp" + subtotal +"\nPajak (10%): Rp" + pajak);
+                if(isMember) System.out.println("\nPoin Terpakai: "+poin+" poin");                
+                }
 
+    static void cetakUIStruk(){
+        System.out.println("\n======= STRUK PEMBAYARAN =======");
+        System.out.println("================================");
+        System.out.println("ID Pesanan: " + pesanan.pesananID);
+        if(!isMember){
+            System.out.println("Nama: "+guestSekarang.getNama());}
+        else{
+            members.get(usedMember).menampilkanPelanggan();}
+        if(pesanan instanceof DineIn){
+            System.out.println("Tipe: Dine In");
+            System.out.println("No Meja: " + ((DineIn) pesanan).noMeja);}
+        else {
+            System.out.println("Tipe: Take Away");}
+        System.out.println("\n=== Pesanan ===");
+        rincianPesanan();
+        }
+        
+            
    //logout         
     static void logout() {
         isMember = false;//hapus penanda member
@@ -600,10 +656,10 @@ public class POSIkanBakarMuara_UAS {
         menuHarga[3]= new MenuHarga( "Nila Bakar Muara", Menu.Status.Tersedia, 26000, Menu.Kategori.Makanan);
         menuHarga[4]= new MenuHarga( "Nasi Putih", Menu.Status.Tersedia, 7000, Menu.Kategori.Makanan);
         menuHarga[5]= new MenuHarga( "Kol Goreng", Menu.Status.Tersedia, 7000, Menu.Kategori.Makanan);
-        menuHarga[9]= new MenuHarga("Es Timun Selasih", Menu.Status.Tersedia, 12000, Menu.Kategori.Minuman);
+        menuHarga[6]= new MenuHarga( "Tahu Goreng", Menu.Status.Tersedia, 10000, Menu.Kategori.Makanan);
         menuHarga[7]= new MenuHarga( "Lemon Tea", Menu.Status.Tersedia, 7000, Menu.Kategori.Minuman);
         menuHarga[8]= new MenuHarga( "Milo", Menu.Status.Tersedia, 8000, Menu.Kategori.Minuman);
-        menuHarga[6]= new MenuHarga( "Tahu Goreng", Menu.Status.Tersedia, 10000, Menu.Kategori.Makanan);
+        menuHarga[9]= new MenuHarga("Es Timun Selasih", Menu.Status.Tersedia, 12000, Menu.Kategori.Minuman);
         menuPoin[0]= new MenuPoin( "Es Timun Selasih", Menu.Status.Tersedia, 12000, Menu.Kategori.Minuman);
         menuPoin[1]= new MenuPoin( "Udang Wangkang Bakar Madu", Menu.Status.Tersedia, 45000, Menu.Kategori.Makanan);
         menuPoin[2]= new MenuPoin( "Pakcoy Tahu", Menu.Status.Habis, 18000, Menu.Kategori.Makanan);
