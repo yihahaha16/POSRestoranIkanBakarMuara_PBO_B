@@ -188,7 +188,7 @@ class PembayaranQRIS extends Pembayaran implements CetakStruk {//inheritance + i
     }
     @Override//polymorphism
     public void bayar(){
-        System.out.println("\n====== Silakan scan QRIS ======");
+        System.out.println("====== Silahkan scan QRIS ======");
         System.out.println("Total pesanan anda Rp" + getTotal());
         System.out.println("****SISTEM****\nSedang menghubungkan ke akun anda\nMendapatkan total yang harus dibayar\nCek saldo apakah mencukupi\nSaldo anda mencukupi\nPembayaran berhasil\nSaldo anda berkurang sebesar "+ getTotal());}
     @Override//polymorphism
@@ -239,12 +239,12 @@ public class POSIkanBakarMuara_UAS {
     //dashboard sebelum login
     static void dashboardSebelumLogin() {
         System.out.println("\n=== Selamat Datang di Ikan Bakar Muara ===\n1. Login Member\n2. Daftar menjadi Member\n3. Lanjut Sebagai Guest\n0. Keluar");
-        System.out.print("Pilih: "); int pilih = input.nextInt(); input.nextLine(); //pilih opsi, ada double input.nextLine() untuk mengecualikan enter
+        System.out.print("Pilih: "); String pilih = input.nextLine();//pilih opsi, ada double input.nextLine() untuk mengecualikan enter
         switch(pilih) {
-            case 1: loginMember(); break;
-            case 2: daftarMember(); break;
-            case 3: masukGuest(); break;
-            case 0: keluar(); break;
+            case "1": loginMember(); break;
+            case "2": daftarMember(); break;
+            case "3": masukGuest(); break;
+            case "0": keluar(); break;
             default:
                 System.out.println("Pilihan tidak valid");
                 dashboardSebelumLogin();
@@ -265,22 +265,29 @@ public class POSIkanBakarMuara_UAS {
                 break;}}
             if (ditemukan == null) {
                 System.out.println("Maaf, nomor telepon atau password salah!\n1. Login ulang\n0. Kembali");
-                System.out.print("Pilih: "); int pilih = input.nextInt(); input.nextLine();
-                if (pilih==1) loginMember();
-                else dashboardSebelumLogin();
+               while (true) {
+                    System.out.print("Pilih: ");String pilih = input.nextLine();
+                    if (pilih.equals("1")) {
+                        loginMember();break;} 
+                    else if (pilih.equals("0")) {
+                        dashboardSebelumLogin();break;} 
+                    else {
+                        System.out.println("Pilihan tidak valid");}}
             } else {
                 System.out.println("Login Berhasil!");
                 isMember=true;
                 dashboardSetelahLogin();
             }}
         catch (NumberFormatException e){
-            System.out.println("Maaf, nomor telepon harus berupa angka!");
-            System.out.println("1. Login ulang");
-            System.out.println("0. Kembali");
-            System.out.print("Pilih: "); int pilih = input.nextInt(); input.nextLine();
-            if (pilih==1) loginMember();
-            else dashboardSebelumLogin();
-        } }
+            System.out.println("Maaf, nomor telepon harus berupa angka!\n1. Login ulang\n0. Kembali");
+               while (true) {
+                    System.out.print("Pilih: ");String pilih = input.nextLine();
+                    if (pilih.equals("1")) {
+                        loginMember();break;} 
+                    else if (pilih.equals("0")) {
+                        dashboardSebelumLogin();break;} 
+                    else {
+                        System.out.println("Pilihan tidak valid");}}}}
 
     //daftar member    
     static void daftarMember() {
@@ -293,27 +300,38 @@ public class POSIkanBakarMuara_UAS {
             for (Member m : members) {
             if (m.getPelangganNoHp().equals(noHp)) {
                 System.out.println("Maaf, nomor telepon telah terdaftar!\n1. Login Member\n2. Daftar ulang\n0. Kembali");
-                System.out.print("Pilih: ");
-                int pilih = input.nextInt();input.nextLine();
-                if (pilih==1) loginMember();
-                else if (pilih==2) daftarMember();
-                else dashboardSebelumLogin();
-            }
-            }
+               while (true) {
+                    System.out.print("Pilih: ");String pilih = input.nextLine();
+                    if (pilih.equals("1")) {
+                        loginMember();break;}
+                    else if(pilih.equals("2")){
+                        daftarMember();break;
+                    } 
+                    else if (pilih.equals("0")) {
+                        dashboardSebelumLogin();break;} 
+                    else {
+                        System.out.println("Pilihan tidak valid");}}}}
             members.add(new Member(noHp, password, nama));
             simpanMember();//simpan member yang didaftar
         System.out.println("Pendaftaran Member BERHASIL!\n1. Login Member\n0. Kembali");
-        System.out.print("Pilih: ");
-        int pilih = input.nextInt();input.nextLine();
-        if (pilih==1) loginMember();
-        else dashboardSebelumLogin();
-        }
+         while (true) {
+                    System.out.print("Pilih: ");String pilih = input.nextLine();
+                    if (pilih.equals("1")) {
+                        loginMember();break;} 
+                    else if (pilih.equals("0")) {
+                        dashboardSebelumLogin();break;} 
+                    else {
+                        System.out.println("Pilihan tidak valid");}}}
         catch (NumberFormatException e){
             System.out.println("Maaf, nomor telepon harus berupa angka!\n1. Daftar ulang\n0. Kembali");
-            System.out.print("Pilih: ");
-            int pilih = input.nextInt();input.nextLine();
-            if (pilih==1) daftarMember();
-            else dashboardSebelumLogin();}}
+               while (true) {
+                    System.out.print("Pilih: ");String pilih = input.nextLine();
+                    if (pilih.equals("1")) {
+                        daftarMember();break;} 
+                    else if (pilih.equals("0")) {
+                        dashboardSebelumLogin();break;} 
+                    else {
+                        System.out.println("Pilihan tidak valid");}}}}
     
     //masuk sebagai guest
     static void masukGuest() {
@@ -329,9 +347,9 @@ public class POSIkanBakarMuara_UAS {
         if(isMember){
             System.out.println("4. Lihat Informasi Member");}
         System.out.println("0. Logout");
-        System.out.print("Pilih: "); int pilih = input.nextInt(); input.nextLine();
+System.out.print("Pilih: "); String pilih = input.nextLine();
         switch(pilih) {
-            case 1: 
+            case "1": 
             System.out.println("\n=== Menu ===");
             lihatMenu();
             System.out.println(jumlahMenu() + 1 + ". Pesan");
@@ -339,7 +357,7 @@ public class POSIkanBakarMuara_UAS {
             lihatMenu1(); 
             break;
 
-            case 2:
+            case "2":
             System.out.println("\n=== Pesan ===");    
             lihatMenu();
             System.out.println(jumlahMenu()+1+". Lihat Keranjang");
@@ -348,9 +366,9 @@ public class POSIkanBakarMuara_UAS {
             pesan();
             break;
 
-            case 3: lihatKeranjang(); break;
-            case 4: lihatInfoMember();break;
-            case 0: logout(); break;
+            case "3": lihatKeranjang(); break;
+            case "4": lihatInfoMember();break;
+            case "0": logout(); break;
             default:
                 System.out.println("Pilihan tidak valid");    
                 dashboardSetelahLogin();  
@@ -381,11 +399,11 @@ public class POSIkanBakarMuara_UAS {
    
     //untuk input di halaman menu (agar lihat menu bisa digunakan banyak kali)
     static void lihatMenu1(){
-        System.out.print("Pilih: ");int pilih = input.nextInt();input.nextLine();
-        if(pilih==0){
+        System.out.print("Pilih: "); String pilih = input.nextLine();
+        if(pilih.equals("0")){
             dashboardSetelahLogin();
         }
-        else if(pilih==jumlahMenu() + 1){
+        else if(pilih.equals(String.valueOf(jumlahMenu() + 1))){
             System.out.println("\n=== Pesan ===");
             lihatMenu();
             System.out.println(jumlahMenu() + 1+". Lihat Keranjang");
@@ -399,20 +417,21 @@ public class POSIkanBakarMuara_UAS {
         }}
 
     static void pesan(){
-        System.out.print("Pilih: ");int pilih = input.nextInt();input.nextLine();
-        if(pilih==0){
+        System.out.print("Pilih: "); String pilih = input.nextLine();
+        int pilihInt = Integer.parseInt(pilih);
+        if(pilih.equals("0")){
             if(dariKeranjang){
                 dariKeranjang=false;
                 lihatKeranjang();}
             else{
                 dashboardSetelahLogin();}}
-        else if(pilih>=1&&pilih<=10){
-            if(menuHarga[pilih-1].menuStatus.equals(Menu.Status.Habis)){
+        else if(pilihInt>=1&&pilihInt<=10){
+            if(menuHarga[pilihInt-1].menuStatus.equals(Menu.Status.Habis)){
                 System.out.println("Maaf menu habis");
                 pesan();}
             else{
                 System.out.print("Kuantitas: "); int kuantitas = input.nextInt();input.nextLine();
-                Menu menuHargaDipilih = menuHarga[pilih - 1];
+                Menu menuHargaDipilih = menuHarga[pilihInt - 1];
                 boolean ditemukan = false;
                 for (Keranjang k : keranjangPelanggan) {
                     if (k.menu == menuHargaDipilih) {
@@ -421,18 +440,18 @@ public class POSIkanBakarMuara_UAS {
                         break;}}
                 if (!ditemukan) {
                     keranjangPelanggan.add(new Keranjang(menuHargaDipilih, kuantitas));}
-                System.out.println("Menu "+menuHarga[pilih-1].menuNama+" ("+kuantitas+") berhasil ditambahkan ke keranjang");
+                System.out.println("Menu "+menuHarga[pilihInt-1].menuNama+" ("+kuantitas+") berhasil ditambahkan ke keranjang");
                 pesan();}}
         else{
-            if(isMember&&pilih>=11&&pilih<=14){
-                if(menuPoin[pilih-menuPoin.length-1].menuStatus.equals(Menu.Status.Habis)){
+            if(isMember&&pilihInt>=11&&pilihInt<=14){
+                if(menuPoin[pilihInt-menuPoin.length-1].menuStatus.equals(Menu.Status.Habis)){
                     System.out.println("Maaf menu habis");}
-                else if(members.get(usedMember).getPoin()<menuPoin[pilih-menuPoin.length-1].getHargaMenuPoin()){
+                else if(members.get(usedMember).getPoin()<menuPoin[pilihInt-menuPoin.length-1].getHargaMenuPoin()){
                     System.out.println("Maaf poin anda tidak mencukupi");}
                 else{
                     System.out.print("Kuantitas: "); int kuantitas = input.nextInt();input.nextLine();
-                    if(members.get(usedMember).getPoin()>=menuPoin[pilih-menuPoin.length-1].getHargaMenuPoin()*kuantitas){
-                    Menu menuPoinDipilih = menuPoin[pilih - menuPoin.length - 1];
+                    if(members.get(usedMember).getPoin()>=menuPoin[pilihInt-menuPoin.length-1].getHargaMenuPoin()*kuantitas){
+                    Menu menuPoinDipilih = menuPoin[pilihInt - menuPoin.length - 1];
                     boolean ditemukan = false;
                     for (Keranjang k : keranjangPoin) {
                         if (k.menu == menuPoinDipilih) {
@@ -441,13 +460,13 @@ public class POSIkanBakarMuara_UAS {
                             break;}}
                     if (!ditemukan) {
                         keranjangPoin.add(new Keranjang(menuPoinDipilih, kuantitas));}
-                    System.out.println("Menu "+menuPoin[pilih-menuPoin.length-1].menuNama+" ("+kuantitas+") berhasil ditambahkan ke keranjang");}   
+                    System.out.println("Menu "+menuPoin[pilihInt-menuPoin.length-1].menuNama+" ("+kuantitas+") berhasil ditambahkan ke keranjang");}   
                     else{
                         System.out.println("Maaf poin anda tidak mencukupi");}
                     pesan();}}
-            else if(pilih==jumlahMenu()+1){
+            else if(pilih.equals(String.valueOf(jumlahMenu() + 1))){
                 lihatKeranjang();}
-            else if(pilih==jumlahMenu()+2){
+            else if(pilih.equals(String.valueOf(jumlahMenu() + 2))){
                 bayar();}
             else{
                 System.out.println("Pilihan tidak valid");
@@ -463,22 +482,22 @@ public class POSIkanBakarMuara_UAS {
         for(int j=0;j<keranjangPoin.size();j++){
             System.out.println(keranjangPoin.get(j).menu.menuNama+" ("+keranjangPoin.get(j).kuantitas+")");} //arraylist memang pakai get(i) gabisa [i]
         System.out.println("1. Tambah Pesanan\n2. Bayar\n3. Hapus item\n0. Kembali");
-        System.out.print("Pilih: "); int pilih = input.nextInt(); input.nextLine(); //pilih opsi, ada double input.nextLine() untuk mengecualikan enter
+        System.out.print("Pilih: "); String pilih = input.nextLine(); //pilih opsi, ada double input.nextLine() untuk mengecualikan enter
         switch (pilih) {
-            case 1:
+            case "1":
                 System.out.println("\n=== Pesan ===");
                 lihatMenu();
                 System.out.println("0. Kembali");
                 dariKeranjang = true;
                 pesan();break;
-            case 2:
+            case "2":
                 if (keranjangPelanggan.isEmpty() && keranjangPoin.isEmpty()) {
                     System.out.println("Keranjang kosong!");
                     lihatKeranjang();}
                 bayar();break;
-            case 3:
+            case "3":
                 hapus(); break;
-            case 0:
+            case "0":
                 dashboardSetelahLogin();break;
             default:
                 System.out.println("Pilihan tidak valid");
@@ -488,8 +507,8 @@ public class POSIkanBakarMuara_UAS {
     static void lihatInfoMember(){
         System.out.println("\n=== Informasi Member ===");
         members.get(usedMember).menampilkanPelanggan();
-        System.out.print("0. Kembali\nPilih: ");int pilih = input.nextInt();input.nextLine();
-    if(pilih==0){
+        System.out.print("0. Kembali\nPilih: ");String pilih = input.nextLine();
+    if(pilih.equals("0")){
         dashboardSetelahLogin();}
     else{
         System.out.println("Pilihan tidak valid");
@@ -517,22 +536,22 @@ public class POSIkanBakarMuara_UAS {
         if(isMember) System.out.println("\nPoin Terpakai: "+poin+" poin");                
         System.out.println("====================");
         System.out.println("\n=== Tipe Pesanan ===\n1. Dine In\n2. Take Away");
-        System.out.print("Pilih: ");int tipe = input.nextInt();input.nextLine();
-        if(tipe == 1){
+        System.out.print("Pilih: ");String tipe = input.nextLine();
+        if(tipe.equals("1")){
             System.out.print("Nomor Meja: ");
             String noMeja = input.nextLine();
             pesanan = new DineIn(totalAkhir, noMeja);}
-        else if(tipe == 2){
+        else if(tipe.equals("2")){
             pesanan = new TakeAway(totalAkhir);}
         else{
             System.out.println("Pilihan tidak valid");
             bayar();
             return;}
         System.out.println((1)+". Bayar Cash\n"+(2)+". Bayar QRIS\n0. Kembali");
-        System.out.print("Pilih: "); int pilih = input.nextInt(); input.nextLine();
-        if(pilih==0){
+        System.out.print("Pilih: "); String pilih = input.nextLine();
+        if(pilih.equals("0")){
             dashboardSetelahLogin();}
-        else if(pilih==1){
+        else if(pilih.equals("1")){
             PembayaranCash cash = new PembayaranCash(totalAkhir);
             System.out.println("\n=== Pembayaran Cash ===");
             System.out.println("Silahkan bayar di kasir dengan nominal Rp" + totalAkhir);
@@ -549,7 +568,7 @@ public class POSIkanBakarMuara_UAS {
         else if(!cash.pembayaranBerhasil()){
             bayar();
             return;}}
-        else if(pilih==2){
+        else if(pilih.equals("2")){
             System.out.println("\n=== Pembayaran QRIS ===");
             PembayaranQRIS qris = new PembayaranQRIS(totalAkhir);
             qris.bayar();
@@ -573,7 +592,7 @@ public class POSIkanBakarMuara_UAS {
 
     //hapus pesanan dari keranjang
     static void hapus(){
-        int pilih;
+        String pilih;int pilihInt;
         System.out.println("\n=== Hapus ===");
         if (keranjangPelanggan.isEmpty()&&keranjangPoin.isEmpty()) {
             System.out.println("Keranjang kosong");}
@@ -581,17 +600,18 @@ public class POSIkanBakarMuara_UAS {
             System.out.println((i+1)+". "+ keranjangPelanggan.get(i).menu.menuNama+" ("+keranjangPelanggan.get(i).kuantitas+")");} //arraylist memang pakai get(i) gabisa [i]
         System.out.println("0. Kembali");
         if (keranjangPelanggan.isEmpty()&&keranjangPoin.isEmpty()) {
-            System.out.print("Pilih: ");pilih = input.nextInt();input.nextLine();
-            if(pilih==0){dashboardSetelahLogin();}}
+            System.out.print("Pilih: "); pilih = input.nextLine();
+         pilihInt = Integer.parseInt(pilih);
+            if(pilih.equals("0")){dashboardSetelahLogin();}}
         else if(!keranjangPelanggan.isEmpty()||!keranjangPoin.isEmpty()){
-            System.out.println("Pilih pesanan yang ingin dihapus: ");pilih = input.nextInt();input.nextLine();
-            if(pilih==0){dashboardSetelahLogin();}
-            else if(pilih>=1 && pilih<=keranjangPelanggan.size()){
-                System.out.println(keranjangPelanggan.get(pilih-1).menu.menuNama+" berhasil dihapus");
-                keranjangPelanggan.remove(pilih-1);}
-            else if(isMember && pilih > keranjangPelanggan.size() &&pilih <= keranjangPelanggan.size()+keranjangPoin.size()){
-                System.out.println(keranjangPoin.get(pilih - keranjangPelanggan.size() - 1).menu.menuNama+" berhasil dihapus");
-                keranjangPoin.remove(pilih - keranjangPelanggan.size() - 1);}
+            System.out.println("Pilih pesanan yang ingin dihapus: "); pilih = input.nextLine();    pilihInt = Integer.parseInt(pilih);
+            if(pilih.equals("0")){dashboardSetelahLogin();}
+            else if(pilihInt>=1 && pilihInt<=keranjangPelanggan.size()){
+                System.out.println(keranjangPelanggan.get(pilihInt-1).menu.menuNama+" berhasil dihapus");
+                keranjangPelanggan.remove(pilihInt-1);}
+            else if(isMember && pilihInt > keranjangPelanggan.size() &&pilihInt <= keranjangPelanggan.size()+keranjangPoin.size()){
+                System.out.println(keranjangPoin.get(pilihInt - keranjangPelanggan.size() - 1).menu.menuNama+" berhasil dihapus");
+                keranjangPoin.remove(pilihInt - keranjangPelanggan.size() - 1);}
             else{
                 System.out.println("Pilihan tidak valid");
                 hapus();}}
@@ -643,8 +663,8 @@ public class POSIkanBakarMuara_UAS {
 
     //untuk loop input di method bayar
     static void selesaiBayar(){    
-        int pilih = input.nextInt();input.nextLine();
-        if(pilih==0){
+        String pilih = input.nextLine();
+        if(pilih.equals("0")){
             dashboardSetelahLogin();}
         else{
             System.out.println("Pilihan tidak valid");
