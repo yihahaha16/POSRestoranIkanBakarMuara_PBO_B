@@ -417,8 +417,15 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
         }}
 
     static void pesan(){
+    while (true) {
         System.out.print("Pilih: "); String pilih = input.nextLine();
-        int pilihInt = Integer.parseInt(pilih);
+        int pilihInt;
+        try {
+            pilihInt = Integer.parseInt(pilih);
+        } catch (NumberFormatException e) {
+            System.out.println("Pilihan tidak valid");
+            continue;
+        }
         if(pilih.equals("0")){
             if(dariKeranjang){
                 dariKeranjang=false;
@@ -470,7 +477,7 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
                 bayar();}
             else{
                 System.out.println("Pilihan tidak valid");
-                pesan();}}}
+                pesan();}}}}
 
     //lihat isi keranjang/pesanan yang udah dipesan
     static void lihatKeranjang(){
