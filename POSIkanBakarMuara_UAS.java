@@ -460,9 +460,9 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
                 pesan();}}
         else{
             if(isMember&&pilihInt>=11&&pilihInt<=14){
-                if(menuPoin[pilihInt-menuPoin.length-1].menuStatus.equals(Menu.Status.Habis)){
+                if(menuPoin[pilihInt-menuHarga.length-1].menuStatus.equals(Menu.Status.Habis)){
                     System.out.println("Maaf menu habis");}
-                else if(members.get(usedMember).getPoin()<menuPoin[pilihInt-menuPoin.length-1].getHargaMenuPoin()){
+                else if(members.get(usedMember).getPoin()<menuPoin[pilihInt-menuHarga.length-1].getHargaMenuPoin()){
                     System.out.println("Maaf poin anda tidak mencukupi");}
                 else{
                  int kuantitasInt;
@@ -475,8 +475,8 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
                     System.out.println("Input tidak valid");
                 }
             }
-                    if(members.get(usedMember).getPoin()>=menuPoin[pilihInt-menuPoin.length-1].getHargaMenuPoin()*kuantitasInt){
-                    Menu menuPoinDipilih = menuPoin[pilihInt - menuPoin.length - 1];
+                    if(members.get(usedMember).getPoin()>=menuPoin[pilihInt-menuHarga.length-1].getHargaMenuPoin()*kuantitasInt){
+                    Menu menuPoinDipilih = menuPoin[pilihInt - menuHarga.length - 1];
                     boolean ditemukan = false;
                     for (Keranjang k : keranjangPoin) {
                         if (k.menu == menuPoinDipilih) {
@@ -485,7 +485,7 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
                             break;}}
                     if (!ditemukan) {
                         keranjangPoin.add(new Keranjang(menuPoinDipilih, kuantitasInt));}
-                    System.out.println("Menu "+menuPoin[pilihInt-menuPoin.length-1].menuNama+" ("+kuantitasInt+") berhasil ditambahkan ke keranjang");}   
+                    System.out.println("Menu "+menuPoin[pilihInt-menuHarga.length-1].menuNama+" ("+kuantitasInt+") berhasil ditambahkan ke keranjang");}   
                     else{
                         System.out.println("Maaf poin anda tidak mencukupi");}
                     pesan();}}
