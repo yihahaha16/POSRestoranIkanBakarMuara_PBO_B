@@ -1,3 +1,4 @@
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 interface CetakStruk {//interface untuk class yang mempunyai method sama namun logika cetak struk yang berbeda (PembayaranQRIS dan PembayaranCash)
@@ -32,10 +33,13 @@ class MenuHarga extends Menu {//inheritance karena ada dua jenis menu, satu paka
     public int getHargaMenuHarga(){ return hargaMenuHarga; }//getter untuk mengambil atribut yang private
     @Override
     public void tampilMenu(){
-        // if(menuStatus == Status.Habis){
-        //     return;
-        // }
-           System.out.println(menuNama+" Rp "+getHargaMenuHarga());
+        if(menuStatus == Status.Habis){
+            System.out.println(menuNama+" Rp"+getHargaMenuHarga()+" (HABIS)") ;
+        }
+        else{
+            System.out.println(menuNama+" Rp"+getHargaMenuHarga()) ;
+        }
+           
     }
 }
 
@@ -112,28 +116,28 @@ class TakeAway extends Pesanan {//subclass
     }
 }
 
-class Pelanggan {//superclass
+class Pelanggan  implements Serializable{//superclass
     enum Status { Member, Guest }
-    private String pelangganNoHp; //encapsulation
+    private String nama; //encapsulation
     private Status pelangganStatus;
-    public Pelanggan(String pelangganNoHp, Status pelangganStatus){ //constructor
-        this.pelangganNoHp = pelangganNoHp;
+    public Pelanggan(String nama, Status pelangganStatus){ //constructor
+        this.nama = nama;
         this.pelangganStatus = pelangganStatus;   
     }
-    public String getPelangganNoHp(){ return pelangganNoHp; }//getter
+    public String getNama(){ return nama; }//getter
     public Status getPelangganStatus(){ return pelangganStatus; }
 }
 
 class Member extends Pelanggan {//subclass
     private int poin = 0; //encapsulation
-    private String nama;
+    private String pelangganNoHp;
     private String password; 
-    public Member(String pelangganNoHp, Pelanggan.Status status, String password, String nama){//constructor
-        super(pelangganNoHp, Pelanggan.Status.Member);//constructor superclass
-        this.nama = nama;
-        this.password = password;
-    }
-    public String getNama(){ return nama; }//getter
+public Member(String pelangganNoHp, String password, String nama){
+    super(nama, Pelanggan.Status.Member);//constructor superclass
+    this.pelangganNoHp = pelangganNoHp;
+    this.password = password;
+}
+    public String getPelangganNoHp(){ return pelangganNoHp; }//getter
     public int getPoin(){ return poin; }
     public String getPassword(){ return password; }
     public void setPoin(int poin){
@@ -151,9 +155,9 @@ class Member extends Pelanggan {//subclass
 }
 
 class Guest extends Pelanggan {//inheritance
-    public Guest(String pelangganNoHp, Pelanggan.Status status){//constructor
-        super(pelangganNoHp, Pelanggan.Status.Guest);//constructor superclass
-    }
+public Guest(String nama){//constructor
+    super(nama, Pelanggan.Status.Guest);//constructor superclass
+}
 }
 
 abstract class Pembayaran {// abstraction yang disembunyikan adalah detail proses pembayaran seperti validasi saldo dan perhitungan kembalian. User hanya menggunakan method bayar() tanpa mengetahui implementasinya
@@ -185,13 +189,10 @@ public PembayaranCash(int total, int saldo) { //constructor
     public void bayar(){
         System.out.println("Uang yang diterima Rp" + saldo);
         System.out.println();
-        if(cekPembayaran(getTotal(), saldo)){
-            System.out.println("===== Pembayaran Berhasil =====");
-            System.out.println("Kembalian anda Rp" + hitungKembalian());
-            System.out.println();
-        } else {
-            System.out.println("Uang anda kurang Rp " + (getTotal() - saldo));
+        if(!cekPembayaran(getTotal(), saldo)){
+            System.out.println("Uang anda kurang Rp" + (getTotal() - saldo));
         }
+        cetakStruk();
     }
     @Override//polymorphism
     public void cetakStruk(){
@@ -212,6 +213,7 @@ class PembayaranQRIS extends Pembayaran implements CetakStruk {//inheritance + i
         System.out.println("====== Silakan scan QRIS ======");
         System.out.println("Total pesanan anda Rp" + getTotal());
         System.out.println("****SISTEM****\nSedang menghubungkan ke akun anda\nMendapatkan total yang harus dibayar\nCek saldo apakah mencukupi\nSaldo anda mencukupi\nPembayaran berhasil\nSaldo anda berkurang sebesar "+ getTotal());
+        cetakStruk();
     }
     @Override//polymorphism
     public void cetakStruk(){
@@ -229,10 +231,38 @@ public class POSIkanBakarMuara_UAS {
     static MenuPoin[] menuPoin = new MenuPoin[4];
     static ArrayList<Keranjang> keranjangPelanggan = new ArrayList<>();
     static ArrayList<Keranjang> keranjangPoin= new ArrayList<>();
+    static Guest guestSekarang;
     static int usedMember;
+    static int jumlahMenu(){
+    int total = menuHarga.length;
+    if(isMember){
+        total += menuPoin.length;
+    }
+    return total;
+}
+    static void simpanMember() {
+    try {
+        ObjectOutputStream out =new ObjectOutputStream(new FileOutputStream("member.txt"));
+        out.writeObject(members);
+        out.close();
+    }
+    catch(Exception e) {
+        System.out.println("Gagal menyimpan member");
+    }
+}
 
+static void loadMember() {
+    try {
+        ObjectInputStream in =new ObjectInputStream(new FileInputStream("member.txt"));
+        members = (ArrayList<Member>) in.readObject();
+        in.close();
+    }
+    catch(Exception e) {
+        members = new ArrayList<>();
+    }
+}
     static void dashboardSebelumLogin() {
-        System.out.println("=== Selamat Datang di Ikan Bakar Muara ===\n1. Login Member\n2. Daftar menjadi Member\n3. Lanjut Sebagai Guest\n0. Keluar");
+        System.out.println("\n=== Selamat Datang di Ikan Bakar Muara ===\n1. Login Member\n2. Daftar menjadi Member\n3. Lanjut Sebagai Guest\n0. Keluar");
         System.out.print("Pilih: "); int pilih = input.nextInt(); input.nextLine(); //pilih opsi, ada double input.nextLine() untuk mengecualikan enter
         switch(pilih) {
             case 1: loginMember(); break;
@@ -249,7 +279,7 @@ public class POSIkanBakarMuara_UAS {
         System.out.print("Nomor Telepon: "); String noHp = input.nextLine();
         System.out.print("Password     : "); String password = input.nextLine();
         try{//validasi angka & cek apakah member & password tersedia https://www.geeksforgeeks.org/java/check-if-a-given-string-is-a-valid-number-integer-or-floating-point-in-java/
-            Integer.parseInt(noHp);
+            Long.parseLong(noHp);
             Member ditemukan = null;//variabel dengan tipe data class menampung 1 buah nohp&pass
             for (int j=0;j<members.size();j++) {
             if (members.get(j).getPelangganNoHp().equals(noHp) && members.get(j).getPassword().equals(password)) {
@@ -284,7 +314,7 @@ public class POSIkanBakarMuara_UAS {
         System.out.print("Password      : ");  String password = input.nextLine();
 
          try{//validasi angka & cek apakah member & password tersedia https://www.geeksforgeeks.org/java/check-if-a-given-string-is-a-valid-number-integer-or-floating-point-in-java/
-            Integer.parseInt(noHp);
+            Long.parseLong(noHp);
             for (Member m : members) {
             if (m.getPelangganNoHp().equals(noHp)) {
                 System.out.println("Maaf, nomor telepon telah terdaftar!\n1. Login Member\n2. Daftar ulang\n0. Kembali");
@@ -295,7 +325,8 @@ public class POSIkanBakarMuara_UAS {
                 else dashboardSebelumLogin();
             }
             }
-            members.add(new Member(noHp, Pelanggan.Status.Member, password,nama));
+            members.add(new Member(noHp, password, nama));
+            simpanMember();
 
         System.out.println("Pendaftaran Member BERHASIL!\n1. Login Member\n0. Kembali");
         System.out.print("Pilih: ");
@@ -312,11 +343,9 @@ public class POSIkanBakarMuara_UAS {
     }
     }
     static void masukGuest() {
-
-        System.out.print("=== Login sebagai guest ===\nNomor Telepon: ");
-        String noHp=input.nextLine();
-        Guest guest = new Guest(noHp, Pelanggan.Status.Guest);
-        dashboardSetelahLogin();;
+        System.out.print("\n=== Login sebagai guest ===\nNama: ");
+        String nama=input.nextLine(); guestSekarang = new Guest(nama);
+        dashboardSetelahLogin();
     }
     static void dashboardSetelahLogin() {
         System.out.println("\n=== Dashboard ===\n1. Lihat Menu\n2. Pesan\n3. Lihat Keranjang");
@@ -328,26 +357,23 @@ public class POSIkanBakarMuara_UAS {
         int pilih = input.nextInt();input.nextLine();
         switch(pilih) {
             case 1: 
-            System.out.println("=== Menu ===");
+            System.out.println("\n=== Menu ===");
             lihatMenu();
-            if(isMember){
-System.out.println("15. Pesan\n0. Kembali");
-            }
-            else{
-                System.out.println("11. Pesan\n0. Kembali");
-            }
+int nomorPesan = jumlahMenu() + 1;
+System.out.println(nomorPesan + ". Pesan");
+System.out.println("0. Kembali");
             
             lihatMenu1(); 
             break;
             case 2:
-            System.out.println("=== Pesan ===");    
+            System.out.println("\n=== Pesan ===");    
             lihatMenu();
-            if(isMember){
-    System.out.println("15. Lihat Keranjang\n16. Bayar\n0. Kembali");
-            }
-            else{
-                System.out.println("11. Lihat Keranjang\n12. Bayar\n0. Kembali");
-            }
+ int nomorKeranjang = jumlahMenu()+1;
+int nomorBayar = jumlahMenu()+2;
+
+System.out.println(nomorKeranjang+". Lihat Keranjang");
+System.out.println(nomorBayar+". Bayar");
+System.out.println("0. Kembali");
             pesan();
      break;
             case 3: lihatKeranjang(); break;
@@ -362,7 +388,7 @@ System.out.println("15. Pesan\n0. Kembali");
         int count=1;
         System.out.println("=== Makanan ===");
         for(MenuHarga menu: menuHarga){
-            if((menu.menuKategori.equals(Menu.Kategori.Makanan)) && (menu.menuStatus == Menu.Status.Tersedia)){
+            if((menu.menuKategori.equals(Menu.Kategori.Makanan))){
                 System.out.print(count+". ");
                 menu.tampilMenu();
                 count++;
@@ -370,7 +396,7 @@ System.out.println("15. Pesan\n0. Kembali");
         }
         System.out.println("=== Minuman ===");
         for(MenuHarga menu: menuHarga){
-            if((menu.menuKategori.equals(Menu.Kategori.Minuman)) && (menu.menuStatus == Menu.Status.Tersedia)){
+            if((menu.menuKategori.equals(Menu.Kategori.Minuman))){
                 System.out.print(count+". ");
                 count++;
                 menu.tampilMenu();
@@ -379,35 +405,42 @@ System.out.println("15. Pesan\n0. Kembali");
         if(isMember){
         System.out.println("=== Poin ===");
         for(MenuPoin menu: menuPoin){
-            if(menu.menuStatus == Menu.Status.Tersedia)
             System.out.print(count+". ");
             count++;    
             menu.tampilMenu();
-        }}
+        }
+    }}
+   
+static void lihatMenu1(){
+    int nomorPesan = jumlahMenu() + 1;
+
+    System.out.print("Pilih: ");
+    int pilih = input.nextInt();
+    input.nextLine();
+
+    if(pilih==0){
+        dashboardSetelahLogin();
     }
-    static void lihatMenu1(){
-        System.out.print("Pilih: ");
-        int pilih = input.nextInt();input.nextLine();
-        if(pilih==0){
-            dashboardSetelahLogin();
-        }
-        else if(pilih==15&&isMember){
-            System.out.println("=== Pesan ===");
-            lihatMenu();
-    System.out.println("15. Lihat Keranjang\n16. Bayar\n0. Kembali");
-            pesan();
-        }
-        else if(pilih==11&&!isMember){
-System.out.println("=== Pesan ===");
-            lihatMenu();
-            System.out.println("11. Lihat Keranjang\n12. Bayar\n0. Kembali");
-            pesan();
-        }
-        else{
-            System.out.println("Pilihan tidak valid");
-            lihatMenu1();
-        }
+    else if(pilih==nomorPesan){
+
+        System.out.println("=== Pesan ===");
+        lihatMenu();
+
+        int nomorKeranjang = jumlahMenu()+1;
+        int nomorBayar = jumlahMenu()+2;
+
+        System.out.println(nomorKeranjang+". Lihat Keranjang");
+        System.out.println(nomorBayar+". Bayar");
+        System.out.println("0. Kembali");
+
+        pesan();
     }
+    else{
+        System.out.println("Pilih menu Pesan untuk mulai memesan");
+        lihatMenu1();
+    }
+}
+
 static void pesan(){
     System.out.print("Pilih: ");
     int pilih = input.nextInt();input.nextLine();
@@ -415,36 +448,54 @@ static void pesan(){
         dashboardSetelahLogin();
     }
     else if(pilih>=1&&pilih<=10){
+if(menuHarga[pilih-1].menuStatus.equals(Menu.Status.Habis)){
+    System.out.println("Maaf menu habis");
+    pesan();
+}
+else{
         System.out.print("Kuantitas: "); int kuantitas = input.nextInt();input.nextLine();
         keranjangPelanggan.add(new Keranjang(menuHarga[pilih-1], kuantitas));
         System.out.println("Menu "+menuHarga[pilih-1].menuNama+" ("+kuantitas+") berhasil ditambahkan ke keranjang");
-        pesan();
+        pesan();}
     }else{
         if(isMember){
             if(pilih>=11&&pilih<=14){
+                if(menuPoin[pilih-menuHarga.length-1].menuStatus.equals(Menu.Status.Habis)){
+    System.out.println("Maaf menu habis");
+    }
+else if( members.get(usedMember).getPoin()<menuPoin[pilih-menuHarga.length-1].getHargaMenuPoin()){
+        System.out.println("Maaf poin anda tidak mencukupi");
+
+}
+else{
             System.out.print("Kuantitas: "); int kuantitas = input.nextInt();input.nextLine();
-            keranjangPoin.add(new Keranjang(menuPoin[pilih-11], kuantitas));
-            System.out.println("Menu "+menuPoin[pilih-11].menuNama+" ("+kuantitas+") berhasil ditambahkan ke keranjang");
-            pesan();
+            keranjangPoin.add(new Keranjang(menuPoin[pilih-menuHarga.length-1], kuantitas));
+            System.out.println("Menu "+menuPoin[pilih-menuHarga.length-1].menuNama+" ("+kuantitas+") berhasil ditambahkan ke keranjang");
+}    pesan();
             }
-            else if(pilih==15){
-                lihatKeranjang();
-            }
-            else if(pilih==16){
-                bayar();
-            }
+int nomorKeranjang = jumlahMenu()+1;
+int nomorBayar = jumlahMenu()+2;
+if(pilih==nomorKeranjang){
+    lihatKeranjang();
+}
+else if(pilih==nomorBayar){
+    bayar();
+}
             else{
 System.out.println("Pilihan tidak valid");
                 pesan();
             }
         }
         else{
-            if(pilih==11){
-                lihatKeranjang();
-            }
-            else if(pilih==12){
-                bayar();
-            }
+int nomorKeranjang = jumlahMenu()+1;
+int nomorBayar = jumlahMenu()+2;
+
+if(pilih==nomorKeranjang){
+    lihatKeranjang();
+}
+else if(pilih==nomorBayar){
+    bayar();
+}
             else{
 System.out.println("Pilihan tidak valid");
                 pesan();}
@@ -453,13 +504,13 @@ System.out.println("Pilihan tidak valid");
 
 }
     static void lihatKeranjang(){
-        System.out.println("=== Keranjang ===");
+        System.out.println("\n=== Keranjang ===");
         int i=0;
         for(i=0;i<keranjangPelanggan.size();i++){
             System.out.println((i+1)+". "+ keranjangPelanggan.get(i).menu.menuNama+" ("+keranjangPelanggan.get(i).kuantitas+")"); //arraylist memang pakai get(i) gabisa [i]
         }
                 for(int j=0;j<keranjangPoin.size();j++){
-            System.out.println((i+1)+". "+ keranjangPelanggan.get(j).menu.menuNama+" ("+keranjangPelanggan.get(j).kuantitas+")"); //arraylist memang pakai get(i) gabisa [i]
+            System.out.println((j+1)+". "+ keranjangPoin.get(j).menu.menuNama+" ("+keranjangPoin.get(j).kuantitas+")"); //arraylist memang pakai get(i) gabisa [i]
         }
         System.out.println((i+1)+". Tambah Pesanan\n"+(i+2)+". Bayar\n"+(i+3)+". Hapus item\n0. Kembali");
         System.out.print("Pilih: "); int pilih = input.nextInt(); input.nextLine(); //pilih opsi, ada double input.nextLine() untuk mengecualikan enter
@@ -485,7 +536,7 @@ else{
         static void lihatInfoMember(){
         System.out.println("=== Informasi Member ===");
         members.get(usedMember).menampilkanPelanggan();
-            System.out.print("0.Kembali\nPilih: ");
+            System.out.print("0. Kembali\nPilih: ");
     int pilih = input.nextInt();input.nextLine();
     if(pilih==0){
         dashboardSetelahLogin();
@@ -501,7 +552,7 @@ else{
 
     for(i=0;i<keranjangPelanggan.size();i++){
         MenuHarga mh = (MenuHarga) keranjangPelanggan.get(i).menu;
-        System.out.println((i+1)+". "+ keranjangPelanggan.get(i).menu.menuNama+" ("+keranjangPelanggan.get(i).kuantitas+") = Rp "+(mh.getHargaMenuHarga()*keranjangPelanggan.get(i).kuantitas));
+        System.out.println((i+1)+". "+ keranjangPelanggan.get(i).menu.menuNama+" ("+keranjangPelanggan.get(i).kuantitas+") = Rp"+(mh.getHargaMenuHarga()*keranjangPelanggan.get(i).kuantitas));
 total+=mh.getHargaMenuHarga()*keranjangPelanggan.get(i).kuantitas;
     }
     if(isMember){
@@ -525,20 +576,18 @@ poin+=mp.getHargaMenuPoin()*keranjangPoin.get(j).kuantitas;
         System.out.print("Masukkan uang: ");
         int saldo = input.nextInt();input.nextLine();
         PembayaranCash cash = new PembayaranCash(total, saldo);
-        cash.bayar();
-    cash.cetakStruk();}
+        cash.bayar();}
     else{
         System.out.println("=== Pembayaran QRIS ===");
         PembayaranQRIS qris = new PembayaranQRIS(total);
         qris.bayar();
-        qris.cetakStruk();
     }
     if(isMember){
         System.out.println("Total poin digunakan: "+ poin+" poin");
     members.get(usedMember).setPoin(-1*poin);
      System.out.println("Sisa Poin: "+ members.get(usedMember).getPoin()+" poin");
     members.get(usedMember).hitungPoin(total);
-    
+    simpanMember();
     System.out.println("===Penambahan Poin===\nPenambahan Poin: "+  ((total * 3) / 100)+" poin");
         System.out.println("Total Poin: "+ members.get(usedMember).getPoin()+" poin");
     }
@@ -583,7 +632,7 @@ if(pilih==0){
     hapus();
     }
     static void keluar() {
-        System.out.println("Terima kasih!");
+        dashboardSebelumLogin();
     }
     static void selesaiBayar(){
         
@@ -612,7 +661,7 @@ if(pilih==0){
             menuPoin[1]= new MenuPoin(2, "Udang Wangkang Bakar Madu", Menu.Status.Tersedia, 45000, Menu.Kategori.Makanan);
             menuPoin[2]= new MenuPoin(3, "Pakcoy Tahu", Menu.Status.Habis, 18000, Menu.Kategori.Makanan);
             menuPoin[3]= new MenuPoin(4, "Nila Bakar Muara", Menu.Status.Tersedia, 26000, Menu.Kategori.Makanan);
-
+loadMember();
         dashboardSebelumLogin();
     }
 } 
