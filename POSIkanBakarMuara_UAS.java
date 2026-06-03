@@ -254,6 +254,9 @@ public class POSIkanBakarMuara_UAS {
         System.out.println("\n=== Login Member ===");
         System.out.print("Nomor Telepon: "); String noHp = input.nextLine();
         System.out.print("Password     : "); String password = input.nextLine();
+        System.out.println("1. Login\n0. Kembali");
+        while(true){System.out.print("Pilih: "); String pilih= input.nextLine();
+if(pilih.equals("1")){
         if (!noHp.matches("^\\+?[0-9]{10,15}$")) {
     System.out.println("Nomor telepon harus terdiri dari 10-15 digit angka dan boleh diawali '+'!");loginMember();return;}
     if (!password.matches("\\S+")) {
@@ -268,7 +271,7 @@ public class POSIkanBakarMuara_UAS {
             if (ditemukan == null) {
                 System.out.println("Maaf, nomor telepon atau password salah!\n1. Login ulang\n0. Kembali");
                while (true) {
-                    System.out.print("Pilih: ");String pilih = input.nextLine();
+                    System.out.print("Pilih: "); pilih = input.nextLine();
                     if (pilih.equals("1")) {
                         loginMember();return;} 
                     else if (pilih.equals("0")) {
@@ -279,6 +282,10 @@ public class POSIkanBakarMuara_UAS {
                 System.out.println("Login Berhasil!");
                 isMember=true;
                 dashboardSetelahLogin(); return;}}
+        else if(pilih.equals("0")){dashboardSebelumLogin();return;
+        }else{
+            System.out.println("Pilihan tidak valid");
+        }}}
 
     //daftar member    
     static void daftarMember() {
@@ -286,9 +293,11 @@ public class POSIkanBakarMuara_UAS {
         System.out.print("Nama Lengkap  : "); String nama = input.nextLine();
         System.out.print("Nomor Telepon : "); String noHp = input.nextLine();
         System.out.print("Password      : ");  String password = input.nextLine();
-
+  System.out.println("1. Login\n0. Kembali");
+        while(true){System.out.print("Pilih: "); String pilih= input.nextLine();
+if(pilih.equals("1")){
         if (!nama.matches("[a-zA-Z]+(?: [a-zA-Z]+)*") || nama.replace(" ", "").length() < 3) {//https://www.w3schools.com/java/ref_string_matches.asp , https://www3.ntu.edu.sg/home/ehchua/programming/howto/Regexe.html
-    System.out.println("Nama harus minimal 3 huruf dan hanya boleh berisi huruf!"); daftarMember();return;}
+    System.out.println("Nama harus minimal 3 huruf, hanya boleh berisi huruf dan dipisahkan dengan sebuah spasi antar kata!"); daftarMember();return;}
     if (!noHp.matches("^\\+?[0-9]{10,15}$")) {
     System.out.println("Nomor telepon harus terdiri dari 10-15 digit angka dan boleh diawali '+'!");daftarMember();return;}
     if (!password.matches("\\S+")) {
@@ -297,7 +306,7 @@ public class POSIkanBakarMuara_UAS {
             if (m.getPelangganNoHp().equals(noHp)) {
                 System.out.println("Maaf, nomor telepon telah terdaftar!\n1. Login Member\n2. Daftar ulang\n0. Kembali");
                while (true) {
-                    System.out.print("Pilih: ");String pilih = input.nextLine();
+                    System.out.print("Pilih: ");pilih = input.nextLine();
                     if (pilih.equals("1")) {
                         loginMember();return;}
                     else if(pilih.equals("2")){
@@ -312,19 +321,23 @@ public class POSIkanBakarMuara_UAS {
             simpanMember();//simpan member yang didaftar
         System.out.println("Pendaftaran Member BERHASIL!\n1. Login Member\n0. Kembali");
          while (true) {
-                    System.out.print("Pilih: ");String pilih = input.nextLine();
+                    System.out.print("Pilih: "); pilih = input.nextLine();
                     if (pilih.equals("1")) {
                         loginMember();break;} 
                     else if (pilih.equals("0")) {
                         dashboardSebelumLogin();break;} 
                     else {
                         System.out.println("Pilihan tidak valid");}}
-        }
-    
+        } else if(pilih.equals("0")){dashboardSebelumLogin();return;
+        }else{
+            System.out.println("Pilihan tidak valid");}
+        }}
     //masuk sebagai guest
     static void masukGuest() {
         System.out.print("\n=== Login sebagai guest ===\nNama: ");
         String nama=input.nextLine(); 
+  if (!nama.matches("[a-zA-Z]+(?: [a-zA-Z]+)*") || nama.replace(" ", "").length() < 3) {//https://www.w3schools.com/java/ref_string_matches.asp , https://www3.ntu.edu.sg/home/ehchua/programming/howto/Regexe.html
+    System.out.println("Nama harus minimal 3 huruf, hanya boleh berisi huruf dan dipisahkan dengan sebuah spasi antar kata!"); masukGuest();return;}
         guestSekarang = new Guest(nama);
         dashboardSetelahLogin();
     }
@@ -689,6 +702,10 @@ public class POSIkanBakarMuara_UAS {
         isMember = false;//hapus penanda member
         usedMember = -1;//hapus penanda member
         guestSekarang = null; //kosongin guest
+        keranjangPelanggan.clear();
+        keranjangPoin.clear();
+        pesanan=null;
+        subtotal=0;pajak=0;totalAkhir=0;poin=0;poinNow=0;
         dashboardSebelumLogin();}
 
     //quit
