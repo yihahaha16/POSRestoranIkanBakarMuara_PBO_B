@@ -545,6 +545,7 @@ if(pilih.equals("1")){
 
     //menangani pembayaran
     static void bayar(){
+        boolean pembayaranSukses = false;
         subtotal = 0; poin=0;
         System.out.println("\n=== Pesanan ===");
         if(keranjangPelanggan.isEmpty()&&keranjangPoin.isEmpty()){
@@ -571,23 +572,33 @@ if(pilih.equals("1")){
         System.out.println("Subtotal: Rp" + subtotal +"\nPajak (10%): Rp" + pajak+ "\nTotal Bayar: Rp" + totalAkhir);
         if(isMember) System.out.println("\nPoin Terpakai: "+poin+" poin");                
         System.out.println("====================");
-        System.out.println("\n=== Tipe Pesanan ===\n1. Dine In\n2. Take Away");
+  
+        System.out.println("\n=== Tipe Pesanan ===\n1. Dine In\n2. Take Away\n0. Kembali");
+        while(true){
         System.out.print("Pilih: ");String tipe = input.nextLine();
-        if(tipe.equals("1")){
-            System.out.print("Nomor Meja: ");
-            String noMeja = input.nextLine();
-            if (!noMeja.matches("^([1-9]|1[0-9]|[LTV]\\d{1,2})$")){
-                System.out.println("Nomor meja terdiri dari angka atau 1 huruf kapital dan angka");
-                bayar();
-            }
-            pesanan = new DineIn(totalAkhir, noMeja);}
+if(tipe.equals("1")){
+    while(true){
+        System.out.print("Nomor Meja: ");
+        String noMeja = input.nextLine();
+
+        if(!noMeja.matches("^[A-Za-z0-9]{1,3}$")){
+            System.out.println("Nomor meja tidak valid");
+        }else{
+            pesanan = new DineIn(totalAkhir, noMeja);
+            break;
+        }
+    }
+    break;
+}
         else if(tipe.equals("2")){
-            pesanan = new TakeAway(totalAkhir);}
-        else{
-            System.out.println("Pilihan tidak valid");
-            bayar();
-            return;}
-        System.out.println((1)+". Bayar Cash\n"+(2)+". Bayar QRIS\n0. Kembali");
+            pesanan = new TakeAway(totalAkhir);break;}
+        else if(tipe.equals("0")){
+            dashboardSetelahLogin();return;
+        }
+            else{
+            System.out.println("Pilihan tidak valid");}}
+        System.out.println("\n=== Metode Pembayaran ===\n"+(1)+". Bayar Cash\n"+(2)+". Bayar QRIS\n0. Kembali");
+        while(true){
         System.out.print("Pilih: "); String pilih = input.nextLine();
         if(pilih.equals("0")){
             dashboardSetelahLogin();return;}
@@ -595,37 +606,42 @@ if(pilih.equals("1")){
             PembayaranCash cash = new PembayaranCash(totalAkhir);
             System.out.println("\n=== Pembayaran Cash ===");
             System.out.println("Silahkan bayar di kasir dengan nominal Rp" + totalAkhir);
-            System.out.print("Masukkan uang: ");
-            int saldo = input.nextInt();input.nextLine();
-            if (saldo <= 0) {
-                System.out.println("Uang tidak valid");bayar();return;}
-            cash.setSaldo(saldo);
+            System.out.println("(Ketik 0 untuk mengulangi pembayaran)");
+           
+            String uang; 
+            int saldo=0;
+            while(true){
+                 System.out.print("Masukkan uang: ");
+            uang = input.nextLine();
+if(uang.equals("0")){bayar();return;}
+            else if (!uang.matches("^[0-9]+$")){System.out.println("Uang harus berupa angka");}
+else{saldo=Integer.parseInt(uang);
+if (saldo <= 0) {
+    System.out.println("Uang harus lebih besar dari 0");}
+    else{break;}
+}}            cash.setSaldo(saldo);
             cash.bayar();
         if (cash.pembayaranBerhasil()) {
+                pembayaranSukses = true;
             cetakUIStruk();
-            cash.cetakStruk();
-        }
-        else {
-            bayar();
-            return;}}
+            cash.cetakStruk();break;}else{bayar();return;}}
         else if(pilih.equals("2")){
             System.out.println("\n=== Pembayaran QRIS ===");
             PembayaranQRIS qris = new PembayaranQRIS(totalAkhir);
             qris.bayar();
+                pembayaranSukses = true;
             cetakUIStruk();
-            qris.cetakStruk();}
+            qris.cetakStruk(); break;}
         else{
-            System.out.println("Pilihan tidak valid");
-            bayar();return;}
-        if(isMember){
-            System.out.println("Total poin digunakan: "+ poin+" poin");
+            System.out.println("Pilihan tidak valid");}}
+        if(pembayaranSukses&&isMember){
+            //System.out.println("Total poin digunakan: "+ poin+" poin");
             members.get(usedMember).setPoin(-1*poin);
             System.out.println("Sisa Poin: "+ members.get(usedMember).getPoin()+" poin");
             members.get(usedMember).hitungPoin(totalAkhir);
             simpanMember();
             System.out.println("\n===Penambahan Poin===\nPenambahan Poin: "+  ((totalAkhir * 3) / 100) +" poin");
             System.out.println("Total Poin: "+ members.get(usedMember).getPoin()+" poin");     poinNow= members.get(usedMember).getPoin();}
-       
         System.out.println("\n===Terima Kasih===");
         keranjangPelanggan.clear();keranjangPoin.clear(); //hapus keranjang
         System.out.println("0. Kembali");
@@ -678,8 +694,8 @@ if(pilih.equals("1")){
                     MenuPoin mp = (MenuPoin) keranjangPoin.get(j).menu;
                     System.out.println((keranjangPelanggan.size()+j+1)+". "+keranjangPoin.get(j).menu.menuNama+" ("+keranjangPoin.get(j).kuantitas+") = "+(mp.getHargaMenuPoin()*keranjangPoin.get(j).kuantitas)+" Poin");}}
                 System.out.println("\n===============");
-                System.out.println("Subtotal: Rp" + subtotal +"\nPajak (10%): Rp" + pajak);
-                if(isMember) System.out.println("\nPoin Terpakai: "+poin+" poin");                
+                System.out.println("Subtotal: Rp" + subtotal +"\nPajak (10%): Rp" + pajak+"\nTotal: Rp"+totalAkhir);
+                if(isMember) System.out.println("Poin Terpakai: "+poin+" poin");                
                 }
 
     static void cetakUIStruk(){
