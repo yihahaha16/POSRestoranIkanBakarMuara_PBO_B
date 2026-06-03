@@ -1,9 +1,0 @@
-Anggota Kelompok 1:
-Faliha Imtinan (D1041241004)
-Violaine Gunawan (D1041241036)
-Zalikhah Khairunnisa (D1041241018)
-Studi kasus ini adalah Sistem POS Restoran Ikan Bakar Muara Sistem ini dibuat agar kasir dapat melakukan input pesanan sehingga proses pencatatan pesanan dapat dilakukan secara lebih akurat, efisien, dan terstruktur.
-Pada halaman index, kasir akan diminta untuk mengisi informasi data pelanggan, seperti nama dan nomor telepon. Lalu dilanjutkan untuk mengisi data pesanan, seperti tanggal pesan, nomor meja, ID kasir, jenis pesanan, dan menyesuaikan kuantitas/jumlah menu yang diinginkan. Data ini akan disimpan pada database menggunakan PDO dan PHP. 
-Selanjutnya,  kasir akan dialihkan ke halaman tambah. Halaman ini akan menampilkan menu yang telah dipilih beserta detail pesanan, seperti kuantitas yang dipesan, subtotal per menu, dan grand total pesanan. Kasir dapat melakukan aksi, seperti mengubah kuantitas dengan tombol edit dan menghapus pesanan dengan tombol hapus. Pada aksi edit, kasir dapat mengubah kuantitas menu yang telah dipesan dengan syarat kuantitas tidak boleh <= 0. Sedangkan pada aksi hapus, kasir dapat menghapus menu yang dipesan dengan syarat melakukan konfirmasi terlebih dahulu (ya/tidak). 
-Selanjutnya, kasir akan dialihkan pada halaman savepesanan, kasir akan memilih metode pembayaran tunai/nontunai sesuai dengan pilihan pelanggan. Setelah memilih metode pembayaran dan menekan tombol bayar kasir akan dialihkan ke halaman selesai dimana halaman tersebut meenampilkan apakah transaksi berhasil/tidak. Kemudian ada tombol kembali ke beranda untuk membuat pesanan baru lagi.
-Dengan adanya sistem ini, proses pencatatan dapat berjalan lebih efisien dan terstruktur.
