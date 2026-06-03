@@ -576,6 +576,10 @@ if(pilih.equals("1")){
         if(tipe.equals("1")){
             System.out.print("Nomor Meja: ");
             String noMeja = input.nextLine();
+            if (!noMeja.matches("^([1-9]|1[0-9]|[LTV]\\d{1,2})$")){
+                System.out.println("Nomor meja terdiri dari angka atau 1 huruf kapital dan angka");
+                bayar();
+            }
             pesanan = new DineIn(totalAkhir, noMeja);}
         else if(tipe.equals("2")){
             pesanan = new TakeAway(totalAkhir);}
