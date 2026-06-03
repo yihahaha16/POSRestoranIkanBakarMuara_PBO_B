@@ -207,9 +207,8 @@ public class POSIkanBakarMuara_UAS {
     static ArrayList<Keranjang> keranjangPoin= new ArrayList<>(); //keranjang untuk menu poin
     static Guest guestSekarang; //terisi kalau login sbg guest
     static int usedMember=0; //terisi kalau login sbg member, simpan indeksnya array list members 
-    static boolean dariKeranjang=false; //penanda untuk kembali ke halaman keranjang
     static Pesanan pesanan;
-    static int subtotal=0, pajak=0, totalAkhir=0, poin=0;
+    static int subtotal=0, pajak=0, totalAkhir=0, poin=0, poinNow;
     static int jumlahMenu(){ //hitung menu otomatis untuk opsi bayar, lihat keranjang dll akan menyesuaikan total menu yang ada
     int total = menuHarga.length;
     if(isMember){
@@ -247,7 +246,7 @@ public class POSIkanBakarMuara_UAS {
             case "0": keluar(); break;
             default:
                 System.out.println("Pilihan tidak valid");
-                dashboardSebelumLogin();
+                dashboardSebelumLogin();return;
         }}
     
     //login member
@@ -255,39 +254,31 @@ public class POSIkanBakarMuara_UAS {
         System.out.println("\n=== Login Member ===");
         System.out.print("Nomor Telepon: "); String noHp = input.nextLine();
         System.out.print("Password     : "); String password = input.nextLine();
-        try{//validasi angka & cek apakah member & password tersedia https://www.geeksforgeeks.org/java/check-if-a-given-string-is-a-valid-number-integer-or-floating-point-in-java/
-            Long.parseLong(noHp);
+        if (!noHp.matches("^\\+?[0-9]{10,15}$")) {
+    System.out.println("Nomor telepon harus terdiri dari 10-15 digit angka dan boleh diawali '+'!");loginMember();return;}
+    if (!password.matches("\\S+")) {
+    System.out.println("Password tidak boleh mengandung spasi!");loginMember();return;}
             Member ditemukan = null;//variabel dengan tipe data class menampung 1 buah nohp&pass
             for (int j=0;j<members.size();j++) {
             if (members.get(j).getPelangganNoHp().equals(noHp) && members.get(j).getPassword().equals(password)) {
                 ditemukan = members.get(j);
                 usedMember=j;
+                poinNow=members.get(j).getPoin();
                 break;}}
             if (ditemukan == null) {
                 System.out.println("Maaf, nomor telepon atau password salah!\n1. Login ulang\n0. Kembali");
                while (true) {
                     System.out.print("Pilih: ");String pilih = input.nextLine();
                     if (pilih.equals("1")) {
-                        loginMember();break;} 
+                        loginMember();return;} 
                     else if (pilih.equals("0")) {
-                        dashboardSebelumLogin();break;} 
+                        dashboardSebelumLogin();return;} 
                     else {
                         System.out.println("Pilihan tidak valid");}}
             } else {
                 System.out.println("Login Berhasil!");
                 isMember=true;
-                dashboardSetelahLogin();
-            }}
-        catch (NumberFormatException e){
-            System.out.println("Maaf, nomor telepon harus berupa angka!\n1. Login ulang\n0. Kembali");
-               while (true) {
-                    System.out.print("Pilih: ");String pilih = input.nextLine();
-                    if (pilih.equals("1")) {
-                        loginMember();break;} 
-                    else if (pilih.equals("0")) {
-                        dashboardSebelumLogin();break;} 
-                    else {
-                        System.out.println("Pilihan tidak valid");}}}}
+                dashboardSetelahLogin(); return;}}
 
     //daftar member    
     static void daftarMember() {
@@ -295,22 +286,28 @@ public class POSIkanBakarMuara_UAS {
         System.out.print("Nama Lengkap  : "); String nama = input.nextLine();
         System.out.print("Nomor Telepon : "); String noHp = input.nextLine();
         System.out.print("Password      : ");  String password = input.nextLine();
-        try{//validasi angka & cek apakah member & password tersedia https://www.geeksforgeeks.org/java/check-if-a-given-string-is-a-valid-number-integer-or-floating-point-in-java/
-            Long.parseLong(noHp);
+
+        if (!nama.matches("[a-zA-Z]+(?: [a-zA-Z]+)*") || nama.replace(" ", "").length() < 3) {//https://www.w3schools.com/java/ref_string_matches.asp , https://www3.ntu.edu.sg/home/ehchua/programming/howto/Regexe.html
+    System.out.println("Nama harus minimal 3 huruf dan hanya boleh berisi huruf!"); daftarMember();return;}
+    if (!noHp.matches("^\\+?[0-9]{10,15}$")) {
+    System.out.println("Nomor telepon harus terdiri dari 10-15 digit angka dan boleh diawali '+'!");daftarMember();return;}
+    if (!password.matches("\\S+")) {
+    System.out.println("Password tidak boleh mengandung spasi!");daftarMember();return;}
             for (Member m : members) {
             if (m.getPelangganNoHp().equals(noHp)) {
                 System.out.println("Maaf, nomor telepon telah terdaftar!\n1. Login Member\n2. Daftar ulang\n0. Kembali");
                while (true) {
                     System.out.print("Pilih: ");String pilih = input.nextLine();
                     if (pilih.equals("1")) {
-                        loginMember();break;}
+                        loginMember();return;}
                     else if(pilih.equals("2")){
-                        daftarMember();break;
+                        daftarMember();return;
                     } 
                     else if (pilih.equals("0")) {
-                        dashboardSebelumLogin();break;} 
+                        dashboardSebelumLogin();return;} 
                     else {
-                        System.out.println("Pilihan tidak valid");}}}}
+                        System.out.println("Pilihan tidak valid");}}
+                    }}
             members.add(new Member(noHp, password, nama));
             simpanMember();//simpan member yang didaftar
         System.out.println("Pendaftaran Member BERHASIL!\n1. Login Member\n0. Kembali");
@@ -321,17 +318,8 @@ public class POSIkanBakarMuara_UAS {
                     else if (pilih.equals("0")) {
                         dashboardSebelumLogin();break;} 
                     else {
-                        System.out.println("Pilihan tidak valid");}}}
-        catch (NumberFormatException e){
-            System.out.println("Maaf, nomor telepon harus berupa angka!\n1. Daftar ulang\n0. Kembali");
-               while (true) {
-                    System.out.print("Pilih: ");String pilih = input.nextLine();
-                    if (pilih.equals("1")) {
-                        daftarMember();break;} 
-                    else if (pilih.equals("0")) {
-                        dashboardSebelumLogin();break;} 
-                    else {
-                        System.out.println("Pilihan tidak valid");}}}}
+                        System.out.println("Pilihan tidak valid");}}
+        }
     
     //masuk sebagai guest
     static void masukGuest() {
@@ -347,7 +335,7 @@ public class POSIkanBakarMuara_UAS {
         if(isMember){
             System.out.println("4. Lihat Informasi Member");}
         System.out.println("0. Logout");
-System.out.print("Pilih: "); String pilih = input.nextLine();
+        System.out.print("Pilih: "); String pilih = input.nextLine();
         switch(pilih) {
             case "1": 
             System.out.println("\n=== Menu ===");
@@ -367,11 +355,11 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
             break;
 
             case "3": lihatKeranjang(); break;
-            case "4": lihatInfoMember();break;
+            case "4": if (!isMember) {System.out.println("Pilihan tidak valid");break;}lihatInfoMember();break;
             case "0": logout(); break;
             default:
                 System.out.println("Pilihan tidak valid");    
-                dashboardSetelahLogin();  
+                dashboardSetelahLogin();  return;
         }}
     
     //untuk menampilkan menu
@@ -401,7 +389,7 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
     static void lihatMenu1(){
         System.out.print("Pilih: "); String pilih = input.nextLine();
         if(pilih.equals("0")){
-            dashboardSetelahLogin();
+            dashboardSetelahLogin(); return;
         }
         else if(pilih.equals(String.valueOf(jumlahMenu() + 1))){
             System.out.println("\n=== Pesan ===");
@@ -409,11 +397,11 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
             System.out.println(jumlahMenu() + 1+". Lihat Keranjang");
             System.out.println(jumlahMenu() + 2+". Bayar");
             System.out.println("0. Kembali");
-            pesan();
+            pesan(); return;
         }
         else{
             System.out.println("Pilih menu Pesan untuk mulai memesan");
-            lihatMenu1();
+            lihatMenu1(); return;
         }}
 
     static void pesan(){
@@ -426,22 +414,21 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
             System.out.println("Pilihan tidak valid");
             continue;
         }
-        if(pilih.equals("0")){
-            if(dariKeranjang){
-                dariKeranjang=false;
-                lihatKeranjang();}
-            else{
-                dashboardSetelahLogin();}}
-        else if(pilihInt>=1&&pilihInt<=10){
+        if(pilihInt==0){
+                dashboardSetelahLogin();return;}
+        else if(pilihInt>=1&&pilihInt<=menuHarga.length){
             if(menuHarga[pilihInt-1].menuStatus.equals(Menu.Status.Habis)){
-                System.out.println("Maaf menu habis");
-                pesan();}
+                System.out.println("Maaf menu habis");continue;}
             else{
  int kuantitasInt;
           while (true) {
     System.out.print("Kuantitas: ");
     try {
         kuantitasInt = Integer.parseInt(input.nextLine());
+        if (kuantitasInt <= 0) {
+            System.out.println("Kuantitas harus lebih dari 0");
+            continue;
+        }
         break;
     } catch (NumberFormatException e) {
         System.out.println("Input tidak valid");
@@ -456,26 +443,26 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
                         break;}}
                 if (!ditemukan) {
                     keranjangPelanggan.add(new Keranjang(menuHargaDipilih, kuantitasInt));}
-                System.out.println("Menu "+menuHarga[pilihInt-1].menuNama+" ("+kuantitasInt+") berhasil ditambahkan ke keranjang");
-                pesan();}}
+                System.out.println("Menu "+menuHarga[pilihInt-1].menuNama+" ("+kuantitasInt+") berhasil ditambahkan ke keranjang");}}
         else{
-            if(isMember&&pilihInt>=11&&pilihInt<=14){
+            if(isMember&&pilihInt>menuHarga.length&&pilihInt<= menuHarga.length + menuPoin.length){
                 if(menuPoin[pilihInt-menuHarga.length-1].menuStatus.equals(Menu.Status.Habis)){
                     System.out.println("Maaf menu habis");}
-                else if(members.get(usedMember).getPoin()<menuPoin[pilihInt-menuHarga.length-1].getHargaMenuPoin()){
-                    System.out.println("Maaf poin anda tidak mencukupi");}
                 else{
                  int kuantitasInt;
                     while (true) {
                 System.out.print("Kuantitas: ");
                 try {
                     kuantitasInt = Integer.parseInt(input.nextLine());
+                    if (kuantitasInt <= 0) {
+    System.out.println("Kuantitas harus lebih dari 0");
+    continue;}
                     break;
                 } catch (NumberFormatException e) {
                     System.out.println("Input tidak valid");
                 }
             }
-                    if(members.get(usedMember).getPoin()>=menuPoin[pilihInt-menuHarga.length-1].getHargaMenuPoin()*kuantitasInt){
+                    if(poinNow>=menuPoin[pilihInt-menuHarga.length-1].getHargaMenuPoin()*kuantitasInt){
                     Menu menuPoinDipilih = menuPoin[pilihInt - menuHarga.length - 1];
                     boolean ditemukan = false;
                     for (Keranjang k : keranjangPoin) {
@@ -485,26 +472,29 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
                             break;}}
                     if (!ditemukan) {
                         keranjangPoin.add(new Keranjang(menuPoinDipilih, kuantitasInt));}
-                    System.out.println("Menu "+menuPoin[pilihInt-menuHarga.length-1].menuNama+" ("+kuantitasInt+") berhasil ditambahkan ke keranjang");}   
+                    System.out.println("Menu "+menuPoin[pilihInt-menuHarga.length-1].menuNama+" ("+kuantitasInt+") berhasil ditambahkan ke keranjang");
+                poinNow-=menuPoin[pilihInt-menuHarga.length-1].getHargaMenuPoin()*kuantitasInt;
+                }   
                     else{
-                        System.out.println("Maaf poin anda tidak mencukupi");}
-                    pesan();}}
-            else if(pilih.equals(String.valueOf(jumlahMenu() + 1))){
-                lihatKeranjang();}
-            else if(pilih.equals(String.valueOf(jumlahMenu() + 2))){
-                bayar();}
+                        System.out.println("Maaf poin anda tidak mencukupi");}}}
+            else if(pilihInt==jumlahMenu() + 1){
+                lihatKeranjang();return;}
+            else if(pilihInt==jumlahMenu() + 2){
+                bayar();return;}
             else{
-                System.out.println("Pilihan tidak valid");
-                pesan();}}}}
+                System.out.println("Pilihan tidak valid");}}}}
 
     //lihat isi keranjang/pesanan yang udah dipesan
     static void lihatKeranjang(){
         System.out.println("\n=== Keranjang ===");
-        if (keranjangPelanggan.isEmpty()) {
+        if (keranjangPelanggan.isEmpty()&&keranjangPoin.isEmpty()) {
             System.out.println("Keranjang kosong");}
         for(int i=0;i<keranjangPelanggan.size();i++){
             System.out.println(keranjangPelanggan.get(i).menu.menuNama+" ("+keranjangPelanggan.get(i).kuantitas+")");} //arraylist memang pakai get(i) gabisa [i]
-        for(int j=0;j<keranjangPoin.size();j++){
+       if(!keranjangPoin.isEmpty()){
+        System.out.println("=== Pesanan dengan Poin ===");
+       }
+            for(int j=0;j<keranjangPoin.size();j++){
             System.out.println(keranjangPoin.get(j).menu.menuNama+" ("+keranjangPoin.get(j).kuantitas+")");} //arraylist memang pakai get(i) gabisa [i]
         System.out.println("1. Tambah Pesanan\n2. Bayar\n3. Hapus item\n0. Kembali");
         System.out.print("Pilih: "); String pilih = input.nextLine(); //pilih opsi, ada double input.nextLine() untuk mengecualikan enter
@@ -512,8 +502,9 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
             case "1":
                 System.out.println("\n=== Pesan ===");
                 lihatMenu();
+                System.out.println(jumlahMenu()+1+". Lihat Keranjang");
+                System.out.println(jumlahMenu()+2+". Bayar");
                 System.out.println("0. Kembali");
-                dariKeranjang = true;
                 pesan();break;
             case "2":
                 if (keranjangPelanggan.isEmpty() && keranjangPoin.isEmpty()) {
@@ -534,7 +525,7 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
         members.get(usedMember).menampilkanPelanggan();
         System.out.print("0. Kembali\nPilih: ");String pilih = input.nextLine();
     if(pilih.equals("0")){
-        dashboardSetelahLogin();}
+        dashboardSetelahLogin();return;}
     else{
         System.out.println("Pilihan tidak valid");
         lihatInfoMember();}}
@@ -543,6 +534,13 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
     static void bayar(){
         subtotal = 0; poin=0;
         System.out.println("\n=== Pesanan ===");
+        if(keranjangPelanggan.isEmpty()&&keranjangPoin.isEmpty()){
+            System.out.println("Belum ada pesanan\n0. Kembali");
+            System.out.print("Pilih: "); String pilih = input.nextLine();
+            if(pilih.equals("0")){dashboardSetelahLogin();return;}
+            else{
+                bayar();return;}}
+        else{
         for(int i=0;i<keranjangPelanggan.size();i++){
             MenuHarga mh = (MenuHarga) keranjangPelanggan.get(i).menu;//casting dari tipe keranjang ke tipe menu harga biar bisa pakai getnya
             System.out.println(keranjangPelanggan.get(i).menu.menuNama+" ("+keranjangPelanggan.get(i).kuantitas+") = Rp"+(mh.getHargaMenuHarga()*keranjangPelanggan.get(i).kuantitas));
@@ -575,22 +573,22 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
         System.out.println((1)+". Bayar Cash\n"+(2)+". Bayar QRIS\n0. Kembali");
         System.out.print("Pilih: "); String pilih = input.nextLine();
         if(pilih.equals("0")){
-            dashboardSetelahLogin();}
+            dashboardSetelahLogin();return;}
         else if(pilih.equals("1")){
             PembayaranCash cash = new PembayaranCash(totalAkhir);
             System.out.println("\n=== Pembayaran Cash ===");
             System.out.println("Silahkan bayar di kasir dengan nominal Rp" + totalAkhir);
             System.out.print("Masukkan uang: ");
             int saldo = input.nextInt();input.nextLine();
-            if (saldo < 0) {
-                System.out.println("Uang tidak valid");return;}
+            if (saldo <= 0) {
+                System.out.println("Uang tidak valid");bayar();return;}
             cash.setSaldo(saldo);
             cash.bayar();
         if (cash.pembayaranBerhasil()) {
             cetakUIStruk();
             cash.cetakStruk();
         }
-        else if(!cash.pembayaranBerhasil()){
+        else {
             bayar();
             return;}}
         else if(pilih.equals("2")){
@@ -601,7 +599,7 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
             qris.cetakStruk();}
         else{
             System.out.println("Pilihan tidak valid");
-            bayar();}
+            bayar();return;}
         if(isMember){
             System.out.println("Total poin digunakan: "+ poin+" poin");
             members.get(usedMember).setPoin(-1*poin);
@@ -609,23 +607,31 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
             members.get(usedMember).hitungPoin(totalAkhir);
             simpanMember();
             System.out.println("\n===Penambahan Poin===\nPenambahan Poin: "+  ((totalAkhir * 3) / 100) +" poin");
-            System.out.println("Total Poin: "+ members.get(usedMember).getPoin()+" poin");}
+            System.out.println("Total Poin: "+ members.get(usedMember).getPoin()+" poin");     poinNow= members.get(usedMember).getPoin();}
+       
         System.out.println("\n===Terima Kasih===");
         keranjangPelanggan.clear();keranjangPoin.clear(); //hapus keranjang
         System.out.println("0. Kembali");
-        selesaiBayar();}
+        selesaiBayar();}}
 
     //hapus pesanan dari keranjang
     static void hapus(){
     String pilih; int pilihInt;
     System.out.println("\n=== Hapus ===");
     if (keranjangPelanggan.isEmpty() && keranjangPoin.isEmpty()) {
-        System.out.println("Keranjang kosong\nPilih: ");pilih = input.nextLine();
+        System.out.println("Keranjang kosong\n0. Kembali");System.out.print("Pilih: ");pilih = input.nextLine();
         if (pilih.equals("0")) {
-            dashboardSetelahLogin();}return;}
+            dashboardSetelahLogin();return;}
+        else{
+            System.out.println("Pilihan tidak valid");hapus();return;
+        }}
+        if(!keranjangPelanggan.isEmpty()){
     for (int i = 0; i < keranjangPelanggan.size(); i++) {
-        System.out.println((i + 1) + ". " + keranjangPelanggan.get(i).menu.menuNama +" (" + keranjangPelanggan.get(i).kuantitas + ")");}
-    System.out.println("0. Kembali");
+        System.out.println((i + 1) + ". " + keranjangPelanggan.get(i).menu.menuNama +" (" + keranjangPelanggan.get(i).kuantitas + ")");}}
+     if(!keranjangPoin.isEmpty()){System.out.println("=== Pesanan dengan Poin ===");
+        for (int j = 0; j < keranjangPoin.size(); j++) {
+        System.out.println((keranjangPelanggan.size() +j+ 1) + ". " + keranjangPoin.get(j).menu.menuNama +" (" + keranjangPoin.get(j).kuantitas + ")");}}
+        System.out.println("0. Kembali");
     while (true) {
         System.out.print("Pilih pesanan yang ingin dihapus: ");pilih = input.nextLine();
         try {
@@ -636,7 +642,7 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
             dashboardSetelahLogin();return;}
         else if (pilihInt >= 1 && pilihInt <= keranjangPelanggan.size()) {
             System.out.println(keranjangPelanggan.get(pilihInt - 1).menu.menuNama + " berhasil dihapus");
-            keranjangPelanggan.remove(pilihInt - 1);return;}
+            keranjangPelanggan.remove(pilihInt - 1);hapus();return;}
         else if (isMember && pilihInt > keranjangPelanggan.size()&& pilihInt <= keranjangPelanggan.size() + keranjangPoin.size()) {
             System.out.println(keranjangPoin.get(pilihInt - keranjangPelanggan.size() - 1).menu.menuNama+ " berhasil dihapus");
             keranjangPoin.remove(pilihInt - keranjangPelanggan.size() - 1);return;}
@@ -679,6 +685,7 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
             
    //logout         
     static void logout() {
+        poinNow=0;
         isMember = false;//hapus penanda member
         usedMember = -1;//hapus penanda member
         guestSekarang = null; //kosongin guest
@@ -689,14 +696,15 @@ System.out.print("Pilih: "); String pilih = input.nextLine();
         System.out.println("=== Terima Kasih ===");System.exit(0);}
 
     //untuk loop input di method bayar
-    static void selesaiBayar(){    
+    static void selesaiBayar(){
+    while(true){
         System.out.print("Pilih: ");
         String pilih = input.nextLine();
         if(pilih.equals("0")){
-            dashboardSetelahLogin();}
-        else{
-            System.out.println("Pilihan tidak valid");
-            selesaiBayar();}}
+            dashboardSetelahLogin();
+            return;}
+        System.out.println("Pilihan tidak valid");}}
+
     public static void main(String[] args) {
         menuHarga[0]= new MenuHarga( "Udang Wangkang Bakar Madu", Menu.Status.Tersedia, 45000, Menu.Kategori.Makanan);
         menuHarga[1]= new MenuHarga( "Ayam Bakar Rica", Menu.Status.Tersedia, 25220, Menu.Kategori.Makanan);
