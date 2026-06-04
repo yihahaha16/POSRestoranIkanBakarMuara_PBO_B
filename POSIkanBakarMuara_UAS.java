@@ -253,7 +253,14 @@ public class POSIkanBakarMuara_UAS {
     static void loginMember() {
         System.out.println("\n=== Login Member ===");
         System.out.print("Nomor Telepon: "); String noHp = input.nextLine();
-        System.out.print("Password     : "); String password = input.nextLine();
+          Console console = System.console();
+        String password;
+        if (console != null) {
+            password = new String(console.readPassword("Password     : "));
+        } else {
+            System.out.print("Password     : ");
+            password = input.nextLine();}
+        //System.out.print("Password     : "); String password = input.nextLine();
         System.out.println("1. Login\n0. Kembali");
         while(true){System.out.print("Pilih: "); String pilih= input.nextLine();
 if(pilih.equals("1")){
@@ -292,7 +299,19 @@ if(pilih.equals("1")){
         System.out.println("\n=== Daftar Menjadi Member ===");
         System.out.print("Nama Lengkap  : "); String nama = input.nextLine();
         System.out.print("Nomor Telepon : "); String noHp = input.nextLine();
-        System.out.print("Password      : ");  String password = input.nextLine();
+        Console console = System.console();
+        String password;
+        String konfirmasiPassword;
+        if (console != null) {
+            password = new String(console.readPassword("Password     : "));
+            konfirmasiPassword = new String(console.readPassword("Konfirmasi Password : "));
+
+        } else {
+            System.out.print("Password     : ");
+            password = input.nextLine();
+            System.out.print("Konfirmasi Password : ");
+    konfirmasiPassword = input.nextLine();}        
+        //System.out.print("Password      : ");  String password = input.nextLine();
   System.out.println("1. Login\n0. Kembali");
         while(true){System.out.print("Pilih: "); String pilih= input.nextLine();
 if(pilih.equals("1")){
@@ -302,7 +321,10 @@ if(pilih.equals("1")){
     System.out.println("Nomor telepon harus terdiri dari 10-15 digit angka dan boleh diawali '+'!");daftarMember();return;}
     if (!password.matches("\\S+")) {
     System.out.println("Password tidak boleh mengandung spasi!");daftarMember();return;}
-            for (Member m : members) {
+      if (!password.equals(konfirmasiPassword)) {
+    System.out.println("Konfirmasi password tidak cocok!");
+    daftarMember();return;}     
+    for (Member m : members) {
             if (m.getPelangganNoHp().equals(noHp)) {
                 System.out.println("Maaf, nomor telepon telah terdaftar!\n1. Login Member\n2. Daftar ulang\n0. Kembali");
                while (true) {
